@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>i want to watch something with you</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
   <style>
@@ -19,10 +18,15 @@
       --text:   #e8dde4;
       --muted:  #7a6e78;
       --glow:   rgba(201,137,154,0.15);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    html, body { height: 100%; background: var(--bg); color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 13px; overflow: hidden; }
+    html, body {
+      height: 100%; background: var(--bg); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     body::before {
       content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
@@ -30,78 +34,80 @@
       opacity: .5;
     }
 
-    /* LOBBY */
+    /* ── LOBBY ── */
     #lobby {
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; height: 100vh; gap: 28px;
+      justify-content: center; height: 100vh; gap: 28px; padding: 20px;
       animation: fadeIn .8s ease;
     }
     .lobby-title {
-      font-family: 'Cormorant Garamond', serif; font-size: clamp(2.6rem,6vw,4.2rem);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 7vw, 4.2rem);
       font-weight: 200; font-style: italic; color: var(--text);
-      text-shadow: 0 0 80px var(--glow);
+      text-shadow: 0 0 80px var(--glow); text-align: center;
     }
-    .lobby-sub { color: var(--muted); font-size: 10px; letter-spacing: .18em;
-      text-transform: uppercase; margin-top: 6px; }
-
-    .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px,90vw); }
+    .lobby-sub { color: var(--muted); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+    .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px, 90vw); }
     .lobby-form input {
       background: var(--bg2); border: 1px solid var(--border); color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 16px;
-      border-radius: 4px; outline: none; transition: border-color .2s, box-shadow .2s;
-      text-align: center; letter-spacing: .06em;
+      font-family: 'DM Mono', monospace; font-size: 16px; /* prevents iOS zoom */
+      padding: 14px 16px; border-radius: 4px; outline: none;
+      transition: border-color .2s, box-shadow .2s; text-align: center; letter-spacing: .06em;
     }
     .lobby-form input::placeholder { color: var(--muted); }
     .lobby-form input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px var(--glow); }
     .lobby-form button {
       background: transparent; border: 1px solid var(--accent2); color: var(--accent);
       font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .14em;
-      text-transform: uppercase; padding: 12px; border-radius: 4px; cursor: pointer;
-      transition: background .2s, box-shadow .2s;
+      text-transform: uppercase; padding: 14px; border-radius: 4px; cursor: pointer;
+      transition: background .2s, box-shadow .2s; -webkit-appearance: none;
     }
-    .lobby-form button:hover { background: var(--glow); box-shadow: 0 0 24px var(--glow); }
+    .lobby-form button:active { background: var(--glow); }
 
-    /* APP */
-    #app { display: none; height: 100vh;
-      grid-template-rows: 44px 1fr;
-      grid-template-columns: 1fr 300px;
-      grid-template-areas: "header header" "player chat";
-      animation: fadeIn .5s ease;
-    }
-    #app.visible { display: grid; }
+    /* ── APP LAYOUT ── */
+    #app { display: none; height: 100vh; flex-direction: column; animation: fadeIn .5s ease; }
+    #app.visible { display: flex; }
 
+    /* HEADER */
     header {
-      grid-area: header; display: flex; align-items: center; gap: 14px;
-      padding: 0 20px; background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+      padding: 0 16px; height: 44px; background: var(--bg2);
+      border-bottom: 1px solid var(--border); z-index: 10;
     }
     .header-title {
       font-family: 'Cormorant Garamond', serif; font-style: italic;
-      font-size: 1.3rem; font-weight: 300; color: var(--accent); margin-right: auto;
+      font-size: 1.2rem; font-weight: 300; color: var(--accent); margin-right: auto;
     }
     .presence { display: flex; gap: 8px; align-items: center; }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .4s; }
     .dot.online { background: var(--accent); box-shadow: 0 0 8px var(--glow); }
     #presence-label { font-size: 10px; color: var(--muted); letter-spacing: .06em; }
 
-    /* player */
-    #player-panel { grid-area: player; display: flex; flex-direction: column; background: var(--bg); }
-
-    .url-bar { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+    /* URL BAR */
+    .url-bar {
+      flex-shrink: 0; display: flex; gap: 8px; padding: 10px 12px;
+      border-bottom: 1px solid var(--border); background: var(--bg2);
+    }
     .url-bar input {
       flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 12px; padding: 8px 12px;
-      border-radius: 3px; outline: none; transition: border-color .2s;
+      font-family: 'DM Mono', monospace; font-size: 14px; padding: 10px 12px;
+      border-radius: 3px; outline: none; transition: border-color .2s; min-width: 0;
     }
     .url-bar input:focus { border-color: var(--accent2); }
     .url-bar input::placeholder { color: var(--muted); }
     .url-bar button {
       background: var(--accent2); border: none; color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 16px;
-      border-radius: 3px; cursor: pointer; letter-spacing: .08em; transition: opacity .2s;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      padding: 10px 16px; border-radius: 3px; cursor: pointer;
+      letter-spacing: .08em; white-space: nowrap; flex-shrink: 0;
+      -webkit-appearance: none;
     }
-    .url-bar button:hover { opacity: .8; }
+    .url-bar button:active { opacity: .75; }
 
-    #yt-wrapper { flex: 1; position: relative; background: #000; }
+    /* VIDEO */
+    #yt-wrapper {
+      flex: 1; position: relative; background: #000; min-height: 0;
+    }
     #yt-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
     .empty-state {
       position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -110,33 +116,85 @@
     .empty-state svg { opacity: .25; }
     .empty-state p { font-size: 11px; letter-spacing: .12em; }
 
+    /* CONTROLS */
     .controls {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 16px; background: var(--bg2); border-top: 1px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: var(--bg2); border-top: 1px solid var(--border);
     }
     .ctrl-btn {
       background: none; border: 1px solid var(--border); color: var(--text);
-      cursor: pointer; border-radius: 3px; padding: 6px 14px;
-      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .08em;
-      transition: border-color .2s, color .2s;
+      cursor: pointer; border-radius: 3px; padding: 8px 14px;
+      font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: .04em;
+      transition: border-color .2s, color .2s; touch-action: manipulation;
+      -webkit-appearance: none;
     }
-    .ctrl-btn:hover { border-color: var(--accent2); color: var(--accent); }
-    .sync-btn { margin-left: auto; border-color: var(--accent2); color: var(--accent); }
-    .sync-btn:hover { background: var(--glow); }
-    #status-bar { font-size: 10px; color: var(--muted); letter-spacing: .06em; flex: 1; }
+    .ctrl-btn:active { border-color: var(--accent2); color: var(--accent); }
+    #status-bar { font-size: 10px; color: var(--muted); letter-spacing: .04em; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .auto-sync-pill {
+      font-size: 9px; letter-spacing: .08em; color: var(--accent2);
+      border: 1px solid var(--accent2); border-radius: 20px;
+      padding: 3px 8px; white-space: nowrap; opacity: 0;
+      transition: opacity .3s;
+    }
+    .auto-sync-pill.visible { opacity: 1; }
 
-    /* chat */
-    #chat-panel {
-      grid-area: chat; display: flex; flex-direction: column;
-      background: var(--bg2); border-left: 1px solid var(--border);
+    /* ── CHAT DRAWER (mobile) / PANEL (desktop) ── */
+    /* Desktop: side panel */
+    @media (min-width: 640px) {
+      #app.visible {
+        display: grid;
+        grid-template-rows: 44px auto 1fr auto;
+        grid-template-columns: 1fr 300px;
+        grid-template-areas:
+          "header  header"
+          "urlbar  chat"
+          "player  chat"
+          "ctrls   chat";
+      }
+      header        { grid-area: header; }
+      .url-bar      { grid-area: urlbar; }
+      #yt-wrapper   { grid-area: player; }
+      .controls     { grid-area: ctrls; }
+      #chat-panel   { grid-area: chat; border-left: 1px solid var(--border); }
+      #chat-toggle  { display: none; }
+      #chat-panel   { transform: none !important; position: static !important;
+                      height: auto !important; max-height: none !important; }
     }
+
+    /* Mobile: bottom drawer */
+    @media (max-width: 639px) {
+      #app.visible { display: flex; flex-direction: column; position: relative; }
+
+      #chat-panel {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+        background: var(--bg2); border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0;
+        transform: translateY(calc(100% - 48px));
+        transition: transform .35s cubic-bezier(.32,.72,0,1);
+        max-height: 75vh;
+        display: flex; flex-direction: column;
+        padding-bottom: var(--safe-bottom);
+      }
+      #chat-panel.open { transform: translateY(0); }
+    }
+
+    #chat-panel { background: var(--bg2); display: flex; flex-direction: column; }
+
     .chat-header {
+      flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
       padding: 13px 16px; border-bottom: 1px solid var(--border);
-      font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted);
+      cursor: pointer; user-select: none;
     }
+    .chat-header-left { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); }
+    .chat-drag-pill { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 10px; display: none; }
+    @media (max-width: 639px) {
+      .chat-drag-pill { display: block; }
+    }
+
     #messages {
       flex: 1; overflow-y: auto; padding: 14px;
       display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth;
+      overscroll-behavior: contain;
     }
     #messages::-webkit-scrollbar { width: 3px; }
     #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -155,20 +213,34 @@
       background: transparent; border-left-color: transparent; font-style: italic; padding-left: 0;
     }
 
-    .chat-input-area { padding: 10px 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .chat-input-area {
+      flex-shrink: 0; padding: 10px 12px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px;
+    }
     .chat-input-area input {
       flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-      font-family: 'Cormorant Garamond', serif; font-size: 15px; padding: 8px 12px;
-      border-radius: 3px; outline: none; transition: border-color .2s;
+      font-family: 'Cormorant Garamond', serif; font-size: 16px;
+      padding: 10px 12px; border-radius: 3px; outline: none;
+      transition: border-color .2s; min-width: 0;
     }
     .chat-input-area input:focus { border-color: var(--accent2); }
     .chat-input-area input::placeholder { color: var(--muted); font-style: italic; }
     .send-btn {
       background: none; border: 1px solid var(--border); color: var(--muted);
-      cursor: pointer; border-radius: 3px; padding: 6px 12px; font-size: 14px;
-      transition: border-color .2s, color .2s;
+      cursor: pointer; border-radius: 3px; padding: 8px 14px; font-size: 16px;
+      transition: border-color .2s, color .2s; touch-action: manipulation;
+      flex-shrink: 0;
     }
-    .send-btn:hover { border-color: var(--accent2); color: var(--accent); }
+    .send-btn:active { border-color: var(--accent2); color: var(--accent); }
+
+    /* unread badge */
+    .unread-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent2); color: var(--text); font-size: 9px;
+      border-radius: 10px; padding: 1px 6px; min-width: 18px;
+      opacity: 0; transition: opacity .2s;
+    }
+    .unread-badge.visible { opacity: 1; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @keyframes msgIn  { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
@@ -176,17 +248,20 @@
 </head>
 <body>
 
+<!-- LOBBY -->
 <div id="lobby">
   <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
     <div class="lobby-title">i want to watch something with you.</div>
     <div class="lobby-sub">im sorry</div>
   </div>
   <div class="lobby-form">
-    <input id="name-input" placeholder="your name" maxlength="20" onkeydown="if(event.key==='Enter') enter()"/>
+    <input id="name-input" placeholder="your name" maxlength="20" inputmode="text"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();enter()}"/>
     <button onclick="enter()">enter ♥</button>
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <header>
     <div class="header-title">just us.</div>
@@ -197,33 +272,40 @@
     </div>
   </header>
 
-  <div id="player-panel">
-    <div class="url-bar">
-      <input id="yt-url" placeholder="paste a youtube url..." onkeydown="if(event.key==='Enter') loadVideo()"/>
-      <button onclick="loadVideo()">load</button>
-    </div>
-    <div id="yt-wrapper">
-      <div class="empty-state" id="empty-state">
-        <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10"/>
-          <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
-        </svg>
-        <p>paste a youtube link above</p>
-      </div>
-    </div>
-    <div class="controls">
-      <button class="ctrl-btn" onclick="ctrlPlay()">▶ play</button>
-      <button class="ctrl-btn" onclick="ctrlPause()">⏸ pause</button>
-      <span id="status-bar"></span>
-      <button class="ctrl-btn sync-btn" onclick="syncNow()">⟳ sync</button>
+  <div class="url-bar">
+    <input id="yt-url" placeholder="paste a youtube url…" inputmode="url"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();loadVideo()}"/>
+    <button onclick="loadVideo()">load</button>
+  </div>
+
+  <div id="yt-wrapper">
+    <div class="empty-state" id="empty-state">
+      <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
+      </svg>
+      <p>paste a youtube link above</p>
     </div>
   </div>
 
+  <div class="controls">
+    <button class="ctrl-btn" onclick="ctrlPlay()">▶</button>
+    <button class="ctrl-btn" onclick="ctrlPause()">⏸</button>
+    <span id="status-bar"></span>
+    <span class="auto-sync-pill" id="sync-pill">auto-synced</span>
+  </div>
+
+  <!-- CHAT -->
   <div id="chat-panel">
-    <div class="chat-header">messages</div>
+    <div class="chat-drag-pill"></div>
+    <div class="chat-header" onclick="toggleChat()">
+      <span class="chat-header-left">messages</span>
+      <span class="unread-badge" id="unread-badge">0</span>
+    </div>
     <div id="messages"></div>
     <div class="chat-input-area">
-      <input id="chat-input" placeholder="say something..." onkeydown="if(event.key==='Enter') sendMsg()"/>
+      <input id="chat-input" placeholder="say something…"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"/>
       <button class="send-btn" onclick="sendMsg()">↑</button>
     </div>
   </div>
@@ -232,23 +314,23 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getDatabase, ref, set, push, onValue, onDisconnect
+    getDatabase, ref, set, push, onValue, onDisconnect, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // 🔧 Replace with your Firebase config
- const firebaseConfig = {
-  apiKey: "AIzaSyBSEbVyZtl0qTHvzprqhielKPWL8vYTOw4",
-  authDomain: "iwannawatchsomethingwithyou.firebaseapp.com",
-  databaseURL: "https://iwannawatchsomethingwithyou-default-rtdb.firebaseio.com",
-  projectId: "iwannawatchsomethingwithyou",
-  storageBucket: "iwannawatchsomethingwithyou.firebasestorage.app",
-  messagingSenderId: "968886424536",
-  appId: "1:968886424536:web:869a6687bc26671c3fd8ad",
-  measurementId: "G-JCTP1MNZYN"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBSEbVyZtl0qTHvzprqhielKPWL8vYTOw4",
+    authDomain: "iwannawatchsomethingwithyou.firebaseapp.com",
+    databaseURL: "https://iwannawatchsomethingwithyou-default-rtdb.firebaseio.com",
+    projectId: "iwannawatchsomethingwithyou",
+    storageBucket: "iwannawatchsomethingwithyou.firebasestorage.app",
+    messagingSenderId: "968886424536",
+    appId: "1:968886424536:web:869a6687bc26671c3fd8ad",
+    measurementId: "G-JCTP1MNZYN"
+  };
 
-  const ROOM = "justus"; // single fixed room
-
+  const ROOM = "justus";
+  const AUTO_SYNC_THRESHOLD = 2.5; // seconds drift before auto-sync
+  const HEARTBEAT_INTERVAL  = 2000; // ms — how often we broadcast position
   const firebase = initializeApp(firebaseConfig);
   const db = getDatabase(firebase);
 
@@ -257,6 +339,9 @@
   let isSyncing = false;
   let ytReady   = false;
   const ytQ     = [];
+  let heartbeatTimer = null;
+  let unreadCount = 0;
+  let chatOpen = false;
 
   // ── YouTube API ──────────────────────────────────────────────────
   window.onYouTubeIframeAPIReady = () => {
@@ -264,9 +349,7 @@
     ytQ.forEach(f => f());
     ytQ.length = 0;
   };
-
   function withYT(fn) { if (ytReady) fn(); else ytQ.push(fn); }
-
   function loadYTScript() {
     const s = document.createElement('script');
     s.src = 'https://www.youtube.com/iframe_api';
@@ -284,27 +367,45 @@
     withYT(() => {
       player = new YT.Player('yt-player', {
         videoId,
-        playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1 },
+        playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1 },
         events: {
           onStateChange: e => {
             if (isSyncing) return;
             const t = player.getCurrentTime();
-            if (e.data === YT.PlayerState.PLAYING)  pushState('play',  t);
-            if (e.data === YT.PlayerState.PAUSED)   pushState('pause', t);
+            if (e.data === YT.PlayerState.PLAYING)  { pushState('play',  t); startHeartbeat(); }
+            if (e.data === YT.PlayerState.PAUSED)   { pushState('pause', t); stopHeartbeat();  }
           }
         }
       });
     });
   }
 
-  // ── Utils ────────────────────────────────────────────────────────
+  // ── Heartbeat: periodically push position so partner can auto-sync ──
+  function startHeartbeat() {
+    stopHeartbeat();
+    heartbeatTimer = setInterval(() => {
+      if (!player?.getCurrentTime) return;
+      const t = player.getCurrentTime();
+      const state = player.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        set(ref(db, `${ROOM}/heartbeat`), { time: t, by: myName, ts: Date.now() });
+      }
+    }, HEARTBEAT_INTERVAL);
+  }
+  function stopHeartbeat() {
+    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+  }
+
+  // ── Utilities ────────────────────────────────────────────────────
   function extractVideoId(url) {
     const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
     return m ? m[1] : null;
   }
-
-  function setStatus(msg) {
-    document.getElementById('status-bar').textContent = msg;
+  function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
+  function flashSyncPill() {
+    const pill = document.getElementById('sync-pill');
+    pill.classList.add('visible');
+    setTimeout(() => pill.classList.remove('visible'), 2000);
   }
 
   function addMsg(name, text, mine, sys = false) {
@@ -318,7 +419,32 @@
          <div class="msg-body">${text}</div>`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
+
+    // unread badge if chat closed and not my own message
+    if (!chatOpen && !mine && !sys) {
+      unreadCount++;
+      const badge = document.getElementById('unread-badge');
+      badge.textContent = unreadCount;
+      badge.classList.add('visible');
+    }
   }
+
+  // ── Chat drawer toggle ───────────────────────────────────────────
+  window.toggleChat = () => {
+    const panel = document.getElementById('chat-panel');
+    chatOpen = !chatOpen;
+    panel.classList.toggle('open', chatOpen);
+    if (chatOpen) {
+      unreadCount = 0;
+      const badge = document.getElementById('unread-badge');
+      badge.classList.remove('visible');
+      setTimeout(() => {
+        const box = document.getElementById('messages');
+        box.scrollTop = box.scrollHeight;
+        document.getElementById('chat-input').focus();
+      }, 360);
+    }
+  };
 
   // ── Enter ────────────────────────────────────────────────────────
   window.enter = () => {
@@ -337,7 +463,6 @@
     const presRef = ref(db, `${ROOM}/presence/${myName}`);
     set(presRef, { name: myName });
     onDisconnect(presRef).remove();
-
     onValue(ref(db, `${ROOM}/presence`), snap => {
       const data   = snap.val() || {};
       const others = Object.keys(data).filter(u => u !== myName);
@@ -357,7 +482,7 @@
   let msgKeys = new Set();
 
   function listenRoom() {
-    // video
+    // Video load
     onValue(ref(db, `${ROOM}/video`), snap => {
       const v = snap.val();
       if (!v) return;
@@ -365,14 +490,34 @@
       if (v.videoId && v.videoId !== curId) makePlayer(v.videoId);
     });
 
-    // state
+    // State (play/pause/seek) — ignore own events
     onValue(ref(db, `${ROOM}/state`), snap => {
       const s = snap.val();
       if (!s || s.by === myName) return;
       applyState(s);
     });
 
-    // messages — only show new ones after initial load
+    // Heartbeat — auto-sync if drifted
+    onValue(ref(db, `${ROOM}/heartbeat`), snap => {
+      const h = snap.val();
+      if (!h || h.by === myName) return;
+      if (!player?.getCurrentTime) return;
+      const myTime = player.getCurrentTime();
+      const drift  = Math.abs(myTime - h.time);
+      // Account for network latency: assume ~300ms travel time
+      const expected = h.time + 0.3;
+      if (drift > AUTO_SYNC_THRESHOLD) {
+        isSyncing = true;
+        player.seekTo(expected, true);
+        const pstate = player.getPlayerState();
+        if (pstate !== YT.PlayerState.PLAYING) player.playVideo();
+        setStatus(`↺ auto-synced (${drift.toFixed(1)}s drift)`);
+        flashSyncPill();
+        setTimeout(() => { isSyncing = false; }, 600);
+      }
+    });
+
+    // Messages
     onValue(ref(db, `${ROOM}/messages`), snap => {
       const msgs = snap.val();
       if (!msgs) return;
@@ -388,10 +533,13 @@
   function applyState(s) {
     if (!player?.seekTo) return;
     isSyncing = true;
-    player.seekTo(s.time, true);
-    if (s.action === 'play')  { player.playVideo();  setStatus('▶ synced'); }
-    if (s.action === 'pause') { player.pauseVideo(); setStatus('⏸ synced'); }
-    if (s.action === 'seek')  { setStatus(`⟳ synced to ${Math.floor(s.time)}s`); }
+    // Compensate for the time that passed since the state was pushed
+    const lag = Math.min((Date.now() - (s.ts || Date.now())) / 1000, 3);
+    const seekTime = s.time + (s.action === 'play' ? lag : 0);
+    player.seekTo(seekTime, true);
+    if (s.action === 'play')  { player.playVideo();  setStatus('▶ synced'); startHeartbeat(); }
+    if (s.action === 'pause') { player.pauseVideo(); setStatus('⏸ paused'); stopHeartbeat();  }
+    if (s.action === 'seek')  { setStatus(`⟳ synced`); }
     setTimeout(() => { isSyncing = false; }, 600);
   }
 
@@ -416,18 +564,14 @@
     if (!player) return;
     player.playVideo();
     pushState('play', player.getCurrentTime());
+    startHeartbeat();
   };
 
   window.ctrlPause = () => {
     if (!player) return;
     player.pauseVideo();
     pushState('pause', player.getCurrentTime());
-  };
-
-  window.syncNow = () => {
-    if (!player) return;
-    pushState('seek', player.getCurrentTime());
-    setStatus('⟳ synced');
+    stopHeartbeat();
   };
 
   // ── Chat ─────────────────────────────────────────────────────────
@@ -438,6 +582,11 @@
     push(ref(db, `${ROOM}/messages`), { name: myName, text, ts: Date.now() });
     input.value = '';
   };
+
+  // Close chat on backdrop tap (mobile)
+  document.getElementById('yt-wrapper').addEventListener('click', () => {
+    if (chatOpen) toggleChat();
+  });
 </script>
 </body>
 </html>
