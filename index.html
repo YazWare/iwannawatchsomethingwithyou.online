@@ -300,6 +300,7 @@
     loadYTScript();
     setupPresence();
     listenRoom();
+    push(ref(db, `${ROOM}/messages`), { name: '—', text: `${myName} joined the room`, system: true, ts: Date.now() });
   };
 
   // ── Presence ─────────────────────────────────────────────────────
