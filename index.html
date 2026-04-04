@@ -14,17 +14,20 @@
       --accent: #c9899a; --accent2: #8b5e70;
       --text: #e8dde4; --muted: #7a6e78;
       --glow: rgba(201,137,154,0.15);
+      /* top block height = header + url-bar + video + controls */
+      --header-h: 40px;
+      --urlbar-h: 52px;
+      --video-h: calc(100vw * 9 / 16);
+      --ctrls-h: 42px;
+      --top-h: calc(var(--header-h) + var(--urlbar-h) + var(--video-h) + var(--ctrls-h));
+      --chat-input-h: 56px;
     }
 
-    html { height: 100%; background: var(--bg); }
-
-    body {
-      height: 100%;
+    html, body {
+      height: 100%; overflow: hidden;
       background: var(--bg); color: var(--text);
       font-family: 'DM Mono', monospace; font-size: 13px;
       -webkit-tap-highlight-color: transparent;
-      /* KEY: let body scroll when keyboard pushes things */
-      overflow: hidden;
     }
 
     /* grain */
@@ -36,9 +39,10 @@
 
     /* ── LOBBY ── */
     #lobby {
+      position: fixed; inset: 0;
       display: flex; flex-direction: column; align-items: center;
-      justify-content: center; height: 100%; gap: 28px; padding: 20px;
-      animation: fadeIn .8s ease;
+      justify-content: center; gap: 28px; padding: 20px;
+      animation: fadeIn .8s ease; background: var(--bg);
     }
     .lobby-title {
       font-family: 'Cormorant Garamond', serif;
@@ -46,16 +50,11 @@
       font-weight: 200; font-style: italic; color: var(--text);
       text-shadow: 0 0 80px var(--glow); text-align: center;
     }
-    .lobby-sub {
-      color: var(--muted); font-size: 10px;
-      letter-spacing: .18em; text-transform: uppercase;
-    }
+    .lobby-sub { color: var(--muted); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
     .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px, 90vw); }
     .lobby-form input {
       background: var(--bg2); border: 1px solid var(--border); color: var(--text);
-      font-family: 'DM Mono', monospace;
-      /* 16px prevents iOS zoom */
-      font-size: 16px;
+      font-family: 'DM Mono', monospace; font-size: 16px;
       padding: 14px 16px; border-radius: 4px; outline: none;
       transition: border-color .2s, box-shadow .2s;
       text-align: center; letter-spacing: .06em;
@@ -70,20 +69,25 @@
     }
     .lobby-form button:active { background: var(--glow); }
 
-    /* ── APP ── */
-    #app {
-      display: none;
-      flex-direction: column;
-      height: 100%;
-    }
-    #app.visible { display: flex; }
+    /* ── APP (mobile-first: everything fixed) ── */
+    #app { display: none; }
+    #app.visible { display: block; }
 
-    /* ── HEADER ── */
+    /* TOP BLOCK — fixed, never moves */
+    #top-block {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+    }
+
     #app-header {
-      flex-shrink: 0;
+      height: var(--header-h);
       display: flex; align-items: center; gap: 12px;
-      padding: 0 14px; height: 40px;
+      padding: 0 14px;
       background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
     .header-title {
       font-family: 'Cormorant Garamond', serif; font-style: italic;
@@ -94,15 +98,15 @@
     .dot.online { background: var(--accent); box-shadow: 0 0 6px var(--glow); }
     #presence-label { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
 
-    /* ── URL BAR ── */
     #url-bar {
-      flex-shrink: 0;
-      display: flex; gap: 8px; padding: 8px 12px;
+      height: var(--urlbar-h);
+      display: flex; align-items: center; gap: 8px; padding: 0 12px;
       background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
     #url-bar input {
       flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 16px; /* no zoom */
+      font-family: 'DM Mono', monospace; font-size: 16px;
       padding: 8px 10px; border-radius: 3px; outline: none; min-width: 0;
       transition: border-color .2s;
     }
@@ -116,18 +120,11 @@
     }
     #url-bar button:active { opacity: .7; }
 
-    /* ── VIDEO ── always fixed height, never squished ── */
     #video-block {
-      flex-shrink: 0;
-      /* 56.25% of viewport width = 16:9 */
-      height: calc(100vw * 9 / 16);
-      max-height: 42vh; /* don't let it eat the whole screen */
-      position: relative;
-      background: #000;
+      height: var(--video-h);
+      position: relative; background: #000; flex-shrink: 0;
     }
-    #video-block iframe {
-      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
-    }
+    #video-block iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
     .empty-state {
       position: absolute; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 12px; color: var(--muted);
@@ -135,12 +132,11 @@
     .empty-state svg { opacity: .22; }
     .empty-state p { font-size: 11px; letter-spacing: .1em; }
 
-    /* ── CONTROLS strip ── */
     #controls {
-      flex-shrink: 0;
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 12px;
+      height: var(--ctrls-h);
+      display: flex; align-items: center; gap: 8px; padding: 0 12px;
       background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
     .ctrl-btn {
       background: none; border: 1px solid var(--border); color: var(--text);
@@ -160,25 +156,26 @@
     }
     .sync-pill.on { opacity: 1; }
 
-    /* ── CHAT SECTION ── fills remaining space, scrollable ── */
+    /* CHAT SECTION — fixed below top block, above bottom */
     #chat-section {
-      flex: 1;
+      position: fixed;
+      top: var(--top-h);
+      left: 0; right: 0;
+      bottom: 0;
       display: flex; flex-direction: column;
-      min-height: 0;
-      /* This is the key: overflow visible so the keyboard pushes the input up */
+      background: var(--bg);
     }
 
     #messages {
       flex: 1;
       overflow-y: auto;
-      padding: 12px 14px;
+      padding: 12px 14px 8px;
       display: flex; flex-direction: column; gap: 10px;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
     }
     #messages::-webkit-scrollbar { width: 0; }
 
-    /* message bubbles — Rave style: bigger, centered-ish */
     .msg { display: flex; flex-direction: column; gap: 2px; animation: msgIn .18s ease; }
     .msg-name { font-size: 10px; color: var(--accent); letter-spacing: .06em; }
     .msg-body {
@@ -192,7 +189,7 @@
       color: var(--muted); font-style: italic;
     }
 
-    /* ── CHAT INPUT BAR ── sticks to bottom above keyboard ── */
+    /* INPUT BAR — always at bottom of chat-section */
     #chat-bar {
       flex-shrink: 0;
       display: flex; align-items: center; gap: 8px;
@@ -202,11 +199,8 @@
       border-top: 1px solid var(--border);
     }
     #chat-bar input {
-      flex: 1;
-      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-      font-family: 'Cormorant Garamond', serif;
-      /* 16px prevents iOS auto-zoom */
-      font-size: 16px;
+      flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      font-family: 'Cormorant Garamond', serif; font-size: 16px;
       padding: 9px 14px; border-radius: 20px; outline: none; min-width: 0;
       transition: border-color .2s;
     }
@@ -222,29 +216,29 @@
 
     /* ── DESKTOP override ── */
     @media (min-width: 640px) {
+      #top-block, #chat-section { position: static; }
       #app.visible {
-        display: grid;
+        display: grid; height: 100vh;
         grid-template-columns: 1fr 300px;
-        grid-template-rows: 40px auto auto auto 1fr auto;
+        grid-template-rows: 40px 52px 1fr 42px;
         grid-template-areas:
-          "header  header"
-          "urlbar  chat"
-          "video   chat"
-          "ctrls   chat"
-          "msgs    chat"
-          "cinput  chat";
+          "header chat"
+          "urlbar chat"
+          "video  chat"
+          "ctrls  chat";
+      }
+      #top-block {
+        display: contents;
       }
       #app-header  { grid-area: header; }
-      #url-bar     { grid-area: urlbar; }
-      #video-block { grid-area: video; max-height: none; height: auto; aspect-ratio: 16/9; }
-      #controls    { grid-area: ctrls; border-bottom: none; border-top: 1px solid var(--border); }
-      #messages    { grid-area: msgs; }
-      #chat-bar    { grid-area: cinput; }
+      #url-bar     { grid-area: urlbar; height: auto; }
+      #video-block { grid-area: video;  height: auto; }
+      #controls    { grid-area: ctrls;  height: auto; }
       #chat-section {
-        grid-area: chat; border-left: 1px solid var(--border);
-        display: flex; flex-direction: column;
+        grid-area: chat;
+        position: static; top: auto; bottom: auto;
+        border-left: 1px solid var(--border);
       }
-      /* on desktop video-block fills naturally */
     }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
