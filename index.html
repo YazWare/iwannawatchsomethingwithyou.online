@@ -240,36 +240,35 @@
 
 <!-- APP -->
 <div id="app">
-  <div id="app-header">
-    <div class="header-title">just us.</div>
-    <div class="presence">
-      <div class="dot online"></div>
-      <div class="dot" id="dot-partner"></div>
-      <div id="presence-label">waiting...</div>
+  <div id="top-block">
+    <div id="app-header">
+      <div class="header-title">just us.</div>
+      <div class="presence">
+        <div class="dot online"></div>
+        <div class="dot" id="dot-partner"></div>
+        <div id="presence-label">waiting...</div>
+      </div>
     </div>
-  </div>
-
-  <div id="url-bar">
-    <input id="yt-url" placeholder="paste a youtube url…" inputmode="url" autocomplete="off"
-      onkeydown="if(event.key==='Enter'){event.preventDefault();loadVideo()}"/>
-    <button onclick="loadVideo()">load</button>
-  </div>
-
-  <div id="video-block">
-    <div class="empty-state" id="empty-state">
-      <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
-      </svg>
-      <p>paste a youtube link above</p>
+    <div id="url-bar">
+      <input id="yt-url" placeholder="paste a youtube url…" inputmode="url" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();loadVideo()}"/>
+      <button onclick="loadVideo()">load</button>
     </div>
-  </div>
-
-  <div id="controls">
-    <button class="ctrl-btn" onclick="ctrlPlay()">▶</button>
-    <button class="ctrl-btn" onclick="ctrlPause()">⏸</button>
-    <span id="status-bar"></span>
-    <span class="sync-pill" id="sync-pill">auto-synced</span>
+    <div id="video-block">
+      <div class="empty-state" id="empty-state">
+        <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
+        </svg>
+        <p>paste a youtube link above</p>
+      </div>
+    </div>
+    <div id="controls">
+      <button class="ctrl-btn" onclick="ctrlPlay()">▶</button>
+      <button class="ctrl-btn" onclick="ctrlPause()">⏸</button>
+      <span id="status-bar"></span>
+      <span class="sync-pill" id="sync-pill">auto-synced</span>
+    </div>
   </div>
 
   <!-- chat section: messages list + input bar -->
@@ -277,8 +276,7 @@
     <div id="messages"></div>
     <div id="chat-bar">
       <input id="chat-input" placeholder="say something…" autocomplete="off"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"
-  />
+        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"/>
       <button id="send-btn" onclick="sendMsg()">↑</button>
     </div>
   </div>
