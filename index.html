@@ -1,323 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>i want to watch something with you</title>
+  <meta charset="UTF-8"/>
+  <!-- font-size=16 prevents iOS zoom on input focus -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
+  <title>just us</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#0c0a0e; --bg2:#110f14; --bg3:#1a1720;
-      --border:rgba(180,140,160,0.12);
-      --accent:#c9899a; --accent2:#8b5e70;
-      --text:#e8dde4; --muted:#7a6e78;
-      --glow:rgba(201,137,154,0.15);
-      --safe-bottom:env(safe-area-inset-bottom, 0px);
-      --chat-bar-h: 52px;
+      --bg: #0c0a0e; --bg2: #110f14; --bg3: #1a1720;
+      --border: rgba(180,140,160,0.12);
+      --accent: #c9899a; --accent2: #8b5e70;
+      --text: #e8dde4; --muted: #7a6e78;
+      --glow: rgba(201,137,154,0.15);
     }
-    html, body {
-      height: 100%; background: var(--bg); color: var(--text);
+
+    html { height: 100%; background: var(--bg); }
+
+    body {
+      height: 100%;
+      background: var(--bg); color: var(--text);
       font-family: 'DM Mono', monospace; font-size: 13px;
-      overflow: hidden; -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: transparent;
+      /* KEY: let body scroll when keyboard pushes things */
+      overflow: hidden;
     }
+
+    /* grain */
     body::before {
-      content:''; position:fixed; inset:0; pointer-events:none; z-index:9999;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      opacity:.5;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: .45;
     }
 
     /* ── LOBBY ── */
     #lobby {
-      display:flex; flex-direction:column; align-items:center;
-      justify-content:center; height:100vh; gap:28px; padding:20px;
-      animation:fadeIn .8s ease;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100%; gap: 28px; padding: 20px;
+      animation: fadeIn .8s ease;
     }
     .lobby-title {
-      font-family:'Cormorant Garamond',serif; font-size:clamp(2rem,7vw,4.2rem);
-      font-weight:200; font-style:italic; color:var(--text);
-      text-shadow:0 0 80px var(--glow); text-align:center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.8rem, 7vw, 4rem);
+      font-weight: 200; font-style: italic; color: var(--text);
+      text-shadow: 0 0 80px var(--glow); text-align: center;
     }
-    .lobby-sub { color:var(--muted); font-size:10px; letter-spacing:.18em; text-transform:uppercase; }
-    .lobby-form { display:flex; flex-direction:column; gap:12px; width:min(300px,90vw); }
+    .lobby-sub {
+      color: var(--muted); font-size: 10px;
+      letter-spacing: .18em; text-transform: uppercase;
+    }
+    .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px, 90vw); }
     .lobby-form input {
-      background:var(--bg2); border:1px solid var(--border); color:var(--text);
-      font-family:'DM Mono',monospace; font-size:16px; padding:14px 16px;
-      border-radius:4px; outline:none; transition:border-color .2s,box-shadow .2s;
-      text-align:center; letter-spacing:.06em;
+      background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+      font-family: 'DM Mono', monospace;
+      /* 16px prevents iOS zoom */
+      font-size: 16px;
+      padding: 14px 16px; border-radius: 4px; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      text-align: center; letter-spacing: .06em;
     }
-    .lobby-form input::placeholder { color:var(--muted); }
-    .lobby-form input:focus { border-color:var(--accent2); box-shadow:0 0 0 3px var(--glow); }
+    .lobby-form input::placeholder { color: var(--muted); }
+    .lobby-form input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px var(--glow); }
     .lobby-form button {
-      background:transparent; border:1px solid var(--accent2); color:var(--accent);
-      font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em;
-      text-transform:uppercase; padding:14px; border-radius:4px; cursor:pointer;
-      transition:background .2s,box-shadow .2s; -webkit-appearance:none;
+      background: transparent; border: 1px solid var(--accent2); color: var(--accent);
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .14em;
+      text-transform: uppercase; padding: 14px; border-radius: 4px; cursor: pointer;
+      -webkit-appearance: none;
     }
-    .lobby-form button:active { background:var(--glow); }
+    .lobby-form button:active { background: var(--glow); }
 
-    /* ── APP BASE ── */
-    #app { display:none; height:100vh; flex-direction:column; animation:fadeIn .5s ease; }
-    #app.visible { display:flex; }
+    /* ── APP ── */
+    #app {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+    #app.visible { display: flex; }
 
-    header {
-      flex-shrink:0; display:flex; align-items:center; gap:14px;
-      padding:0 16px; height:44px; background:var(--bg2);
-      border-bottom:1px solid var(--border); z-index:10;
+    /* ── HEADER ── */
+    #app-header {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 14px; height: 40px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
     }
     .header-title {
-      font-family:'Cormorant Garamond',serif; font-style:italic;
-      font-size:1.2rem; font-weight:300; color:var(--accent); margin-right:auto;
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 1.15rem; font-weight: 300; color: var(--accent); margin-right: auto;
     }
-    .presence { display:flex; gap:8px; align-items:center; }
-    .dot { width:7px; height:7px; border-radius:50%; background:var(--muted); transition:background .4s; }
-    .dot.online { background:var(--accent); box-shadow:0 0 8px var(--glow); }
-    #presence-label { font-size:10px; color:var(--muted); letter-spacing:.06em; }
+    .presence { display: flex; gap: 7px; align-items: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: background .4s; }
+    .dot.online { background: var(--accent); box-shadow: 0 0 6px var(--glow); }
+    #presence-label { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
 
-    .url-bar {
-      flex-shrink:0; display:flex; gap:8px; padding:10px 12px;
-      border-bottom:1px solid var(--border); background:var(--bg2);
+    /* ── URL BAR ── */
+    #url-bar {
+      flex-shrink: 0;
+      display: flex; gap: 8px; padding: 8px 12px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
     }
-    .url-bar input {
-      flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text);
-      font-family:'DM Mono',monospace; font-size:14px; padding:10px 12px;
-      border-radius:3px; outline:none; transition:border-color .2s; min-width:0;
+    #url-bar input {
+      flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 16px; /* no zoom */
+      padding: 8px 10px; border-radius: 3px; outline: none; min-width: 0;
+      transition: border-color .2s;
     }
-    .url-bar input:focus { border-color:var(--accent2); }
-    .url-bar input::placeholder { color:var(--muted); }
-    .url-bar button {
-      background:var(--accent2); border:none; color:var(--text);
-      font-family:'DM Mono',monospace; font-size:11px; padding:10px 16px;
-      border-radius:3px; cursor:pointer; letter-spacing:.08em;
-      white-space:nowrap; flex-shrink:0; -webkit-appearance:none;
+    #url-bar input:focus { border-color: var(--accent2); }
+    #url-bar input::placeholder { color: var(--muted); font-size: 12px; }
+    #url-bar button {
+      background: var(--accent2); border: none; color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 14px;
+      border-radius: 3px; cursor: pointer; letter-spacing: .06em;
+      white-space: nowrap; flex-shrink: 0; -webkit-appearance: none;
     }
-    .url-bar button:active { opacity:.75; }
+    #url-bar button:active { opacity: .7; }
 
-    /* video takes all remaining space */
-    #yt-wrapper { flex:1; position:relative; background:#000; min-height:0; }
-    #yt-wrapper iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+    /* ── VIDEO ── always fixed height, never squished ── */
+    #video-block {
+      flex-shrink: 0;
+      /* 56.25% of viewport width = 16:9 */
+      height: calc(100vw * 9 / 16);
+      max-height: 42vh; /* don't let it eat the whole screen */
+      position: relative;
+      background: #000;
+    }
+    #video-block iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+    }
     .empty-state {
-      position:absolute; inset:0; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:14px; color:var(--muted);
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px; color: var(--muted);
     }
-    .empty-state svg { opacity:.25; }
-    .empty-state p { font-size:11px; letter-spacing:.12em; }
+    .empty-state svg { opacity: .22; }
+    .empty-state p { font-size: 11px; letter-spacing: .1em; }
 
-    .controls {
-      flex-shrink:0; display:flex; align-items:center; gap:8px;
-      padding:8px 12px; background:var(--bg2); border-top:1px solid var(--border);
+    /* ── CONTROLS strip ── */
+    #controls {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
     }
     .ctrl-btn {
-      background:none; border:1px solid var(--border); color:var(--text);
-      cursor:pointer; border-radius:3px; padding:8px 14px;
-      font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.04em;
-      transition:border-color .2s,color .2s; touch-action:manipulation; -webkit-appearance:none;
+      background: none; border: 1px solid var(--border); color: var(--text);
+      cursor: pointer; border-radius: 3px; padding: 6px 12px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      touch-action: manipulation; -webkit-appearance: none;
     }
-    .ctrl-btn:active { border-color:var(--accent2); color:var(--accent); }
+    .ctrl-btn:active { border-color: var(--accent2); color: var(--accent); }
     #status-bar {
-      font-size:10px; color:var(--muted); letter-spacing:.04em;
-      flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      flex: 1; font-size: 10px; color: var(--muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
-    .auto-sync-pill {
-      font-size:9px; letter-spacing:.08em; color:var(--accent2);
-      border:1px solid var(--accent2); border-radius:20px; padding:3px 8px;
-      white-space:nowrap; opacity:0; transition:opacity .3s;
+    .sync-pill {
+      font-size: 9px; color: var(--accent2); border: 1px solid var(--accent2);
+      border-radius: 20px; padding: 2px 7px; opacity: 0; transition: opacity .3s;
+      white-space: nowrap;
     }
-    .auto-sync-pill.visible { opacity:1; }
+    .sync-pill.on { opacity: 1; }
 
-    /* ═══════════════════════════════════════════
-       MOBILE CHAT  — floating bar + slide-up drawer
-       ═══════════════════════════════════════════ */
-    @media (max-width: 639px) {
-
-      /* the whole chat panel sits fixed at the bottom */
-      #chat-panel {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        z-index: 200;
-        display: flex;
-        flex-direction: column;
-        background: transparent;        /* bar itself is transparent */
-        pointer-events: none;           /* let taps pass through by default */
-      }
-
-      /* history drawer — slides up from above the bar */
-      #msg-drawer {
-        background: var(--bg2);
-        border-top: 1px solid var(--border);
-        border-radius: 14px 14px 0 0;
-        max-height: 55vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transform: translateY(100%);
-        transition: transform .32s cubic-bezier(.32,.72,0,1);
-        pointer-events: auto;
-      }
-      #msg-drawer.open { transform: translateY(0); }
-
-      .drawer-handle {
-        flex-shrink: 0;
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 16px 8px;
-        cursor: pointer;
-        user-select: none;
-      }
-      .drawer-pill {
-        width: 36px; height: 4px; border-radius: 2px;
-        background: var(--border); margin: 0 auto;
-      }
-      .drawer-close {
-        font-size: 10px; color: var(--muted); letter-spacing: .1em;
-        text-transform: uppercase;
-      }
-      #messages {
-        flex: 1; overflow-y: auto; padding: 10px 14px;
-        display: flex; flex-direction: column; gap: 10px;
-        overscroll-behavior: contain;
-      }
-
-      /* the always-visible input bar */
-      #chat-bar {
-        flex-shrink: 0;
-        display: flex; align-items: center; gap: 8px;
-        padding: 8px 12px;
-        padding-bottom: calc(8px + var(--safe-bottom));
-        background: rgba(17,15,20,0.92);
-        backdrop-filter: blur(12px) saturate(1.4);
-        -webkit-backdrop-filter: blur(12px) saturate(1.4);
-        border-top: 1px solid var(--border);
-        pointer-events: auto;
-      }
-
-      /* history toggle button (msg count bubble) */
-      #history-btn {
-        flex-shrink: 0;
-        background: var(--bg3); border: 1px solid var(--border);
-        color: var(--muted); border-radius: 50%;
-        width: 36px; height: 36px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; font-size: 13px; position: relative;
-        touch-action: manipulation;
-      }
-      #history-btn:active { border-color: var(--accent2); }
-      .unread-dot {
-        position: absolute; top: -2px; right: -2px;
-        width: 8px; height: 8px; border-radius: 50%;
-        background: var(--accent); display: none;
-      }
-      .unread-dot.visible { display: block; }
-
-      #chat-bar input {
-        flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-        font-family: 'Cormorant Garamond', serif; font-size: 16px;
-        padding: 9px 12px; border-radius: 20px; outline: none;
-        transition: border-color .2s; min-width: 0;
-      }
-      #chat-bar input:focus { border-color: var(--accent2); }
-      #chat-bar input::placeholder { color: var(--muted); font-style: italic; }
-      .send-btn-mobile {
-        flex-shrink: 0; background: var(--accent2); border: none;
-        color: var(--text); cursor: pointer; border-radius: 50%;
-        width: 36px; height: 36px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; touch-action: manipulation;
-      }
-      .send-btn-mobile:active { opacity: .75; }
-
-      /* hide desktop chat elements on mobile */
-      .chat-header-desktop, #messages-desktop-wrap { display: none !important; }
+    /* ── CHAT SECTION ── fills remaining space, scrollable ── */
+    #chat-section {
+      flex: 1;
+      display: flex; flex-direction: column;
+      min-height: 0;
+      /* This is the key: overflow visible so the keyboard pushes the input up */
     }
 
-    /* ═══════════════════════════════════════════
-       DESKTOP CHAT  — sidebar
-       ═══════════════════════════════════════════ */
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 10px;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    #messages::-webkit-scrollbar { width: 0; }
+
+    /* message bubbles — Rave style: bigger, centered-ish */
+    .msg { display: flex; flex-direction: column; gap: 2px; animation: msgIn .18s ease; }
+    .msg-name { font-size: 10px; color: var(--accent); letter-spacing: .06em; }
+    .msg-body {
+      font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 300;
+      color: var(--text); line-height: 1.45;
+    }
+    .msg.mine { align-items: flex-end; }
+    .msg.mine .msg-body { color: var(--accent); }
+    .msg.system .msg-body {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--muted); font-style: italic;
+    }
+
+    /* ── CHAT INPUT BAR ── sticks to bottom above keyboard ── */
+    #chat-bar {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+    }
+    #chat-bar input {
+      flex: 1;
+      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      font-family: 'Cormorant Garamond', serif;
+      /* 16px prevents iOS auto-zoom */
+      font-size: 16px;
+      padding: 9px 14px; border-radius: 20px; outline: none; min-width: 0;
+      transition: border-color .2s;
+    }
+    #chat-bar input:focus { border-color: var(--accent2); }
+    #chat-bar input::placeholder { color: var(--muted); font-style: italic; font-size: 14px; }
+    #send-btn {
+      flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent2); border: none; color: var(--text);
+      font-size: 15px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; touch-action: manipulation;
+    }
+    #send-btn:active { opacity: .7; }
+
+    /* ── DESKTOP override ── */
     @media (min-width: 640px) {
       #app.visible {
         display: grid;
-        grid-template-rows: 44px auto 1fr auto;
         grid-template-columns: 1fr 300px;
+        grid-template-rows: 40px auto auto auto 1fr auto;
         grid-template-areas:
           "header  header"
           "urlbar  chat"
-          "player  chat"
-          "ctrls   chat";
+          "video   chat"
+          "ctrls   chat"
+          "msgs    chat"
+          "cinput  chat";
       }
-      header     { grid-area: header; }
-      .url-bar   { grid-area: urlbar; }
-      #yt-wrapper{ grid-area: player; }
-      .controls  { grid-area: ctrls; }
-      #chat-panel {
-        grid-area: chat;
+      #app-header  { grid-area: header; }
+      #url-bar     { grid-area: urlbar; }
+      #video-block { grid-area: video; max-height: none; height: auto; aspect-ratio: 16/9; }
+      #controls    { grid-area: ctrls; border-bottom: none; border-top: 1px solid var(--border); }
+      #messages    { grid-area: msgs; }
+      #chat-bar    { grid-area: cinput; }
+      #chat-section {
+        grid-area: chat; border-left: 1px solid var(--border);
         display: flex; flex-direction: column;
-        background: var(--bg2); border-left: 1px solid var(--border);
       }
-      /* hide mobile-only elements */
-      #msg-drawer, #chat-bar, #history-btn { display: none !important; }
-
-      .chat-header-desktop {
-        flex-shrink: 0; padding: 13px 16px;
-        border-bottom: 1px solid var(--border);
-        font-size: 10px; letter-spacing: .15em;
-        text-transform: uppercase; color: var(--muted);
-      }
-      #messages {
-        flex: 1; overflow-y: auto; padding: 14px;
-        display: flex; flex-direction: column; gap: 12px;
-        scroll-behavior: smooth; overscroll-behavior: contain;
-      }
-      .chat-input-desktop {
-        flex-shrink: 0; padding: 10px 12px;
-        border-top: 1px solid var(--border); display: flex; gap: 8px;
-      }
-      .chat-input-desktop input {
-        flex: 1; background: var(--bg3); border: 1px solid var(--border); color: var(--text);
-        font-family: 'Cormorant Garamond', serif; font-size: 15px;
-        padding: 9px 12px; border-radius: 3px; outline: none;
-        transition: border-color .2s; min-width: 0;
-      }
-      .chat-input-desktop input:focus { border-color: var(--accent2); }
-      .chat-input-desktop input::placeholder { color: var(--muted); font-style: italic; }
-      .send-btn-desktop {
-        background: none; border: 1px solid var(--border); color: var(--muted);
-        cursor: pointer; border-radius: 3px; padding: 8px 14px; font-size: 16px;
-        transition: border-color .2s, color .2s; touch-action: manipulation;
-      }
-      .send-btn-desktop:hover { border-color: var(--accent2); color: var(--accent); }
+      /* on desktop video-block fills naturally */
     }
 
-    /* ── shared message styles ── */
-    #messages::-webkit-scrollbar { width: 3px; }
-    #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .msg { display:flex; flex-direction:column; gap:3px; animation:msgIn .2s ease; }
-    .msg-meta { font-size:9px; letter-spacing:.08em; color:var(--muted); display:flex; gap:6px; align-items:baseline; }
-    .msg-name { color:var(--accent); }
-    .msg-body {
-      font-family:'Cormorant Garamond',serif; font-size:15px; font-weight:300;
-      color:var(--text); line-height:1.5; background:var(--bg3);
-      border-left:2px solid var(--border); padding:6px 10px; border-radius:0 4px 4px 0;
-    }
-    .msg.mine .msg-body { border-left-color:var(--accent2); background:rgba(139,94,112,0.08); }
-    .msg.system .msg-body {
-      font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
-      background:transparent; border-left-color:transparent;
-      font-style:italic; padding-left:0;
-    }
-
-    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-    @keyframes msgIn  { from{opacity:0;transform:translateX(-4px)} to{opacity:1;transform:none} }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @keyframes msgIn  { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
 
 <!-- LOBBY -->
 <div id="lobby">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
     <div class="lobby-title">i want to watch something with you.</div>
-    <div class="lobby-sub">i miss you</div>
+    <div class="lobby-sub">i miss u</div>
   </div>
   <div class="lobby-form">
-    <input id="name-input" placeholder="your name" maxlength="20" inputmode="text"
+    <input id="name-input" placeholder="your name" maxlength="20"
+      inputmode="text" autocomplete="off"
       onkeydown="if(event.key==='Enter'){event.preventDefault();enter()}"/>
     <button onclick="enter()">enter ♥</button>
   </div>
@@ -325,24 +269,24 @@
 
 <!-- APP -->
 <div id="app">
-  <header>
+  <div id="app-header">
     <div class="header-title">just us.</div>
     <div class="presence">
       <div class="dot online"></div>
       <div class="dot" id="dot-partner"></div>
       <div id="presence-label">waiting...</div>
     </div>
-  </header>
+  </div>
 
-  <div class="url-bar">
-    <input id="yt-url" placeholder="paste a youtube url…" inputmode="url"
+  <div id="url-bar">
+    <input id="yt-url" placeholder="paste a youtube url…" inputmode="url" autocomplete="off"
       onkeydown="if(event.key==='Enter'){event.preventDefault();loadVideo()}"/>
     <button onclick="loadVideo()">load</button>
   </div>
 
-  <div id="yt-wrapper">
+  <div id="video-block">
     <div class="empty-state" id="empty-state">
-      <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
+      <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10"/>
         <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
       </svg>
@@ -350,42 +294,21 @@
     </div>
   </div>
 
-  <div class="controls">
+  <div id="controls">
     <button class="ctrl-btn" onclick="ctrlPlay()">▶</button>
     <button class="ctrl-btn" onclick="ctrlPause()">⏸</button>
     <span id="status-bar"></span>
-    <span class="auto-sync-pill" id="sync-pill">auto-synced</span>
+    <span class="sync-pill" id="sync-pill">auto-synced</span>
   </div>
 
-  <!-- CHAT PANEL -->
-  <div id="chat-panel">
-
-    <!-- MOBILE: slide-up message drawer -->
-    <div id="msg-drawer">
-      <div class="drawer-handle" onclick="toggleDrawer()">
-        <div class="drawer-pill"></div>
-        <div class="drawer-close">close ×</div>
-      </div>
-      <div id="messages"></div>
-    </div>
-
-    <!-- MOBILE: always-visible input bar -->
+  <!-- chat section: messages list + input bar -->
+  <div id="chat-section">
+    <div id="messages"></div>
     <div id="chat-bar">
-      <div id="history-btn" onclick="toggleDrawer()">
-        💬
-        <div class="unread-dot" id="unread-dot"></div>
-      </div>
-      <input id="chat-input-mobile" placeholder="say something…"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"/>
-      <button class="send-btn-mobile" onclick="sendMsg()">↑</button>
-    </div>
-
-    <!-- DESKTOP: sidebar layout -->
-    <div class="chat-header-desktop">messages</div>
-    <div class="chat-input-desktop">
-      <input id="chat-input-desktop" placeholder="say something…"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"/>
-      <button class="send-btn-desktop" onclick="sendMsg()">↑</button>
+      <input id="chat-input" placeholder="say something…" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();sendMsg()}"
+        onfocus="scrollMsgs()"/>
+      <button id="send-btn" onclick="sendMsg()">↑</button>
     </div>
   </div>
 </div>
@@ -408,31 +331,21 @@
 
   const ROOM = "justus";
   const AUTO_SYNC_THRESHOLD = 2.5;
-  const HEARTBEAT_INTERVAL  = 3000;
+  const HEARTBEAT_MS = 3000;
 
   const firebase = initializeApp(firebaseConfig);
   const db = getDatabase(firebase);
 
-  let myName        = '';
-  let player        = null;
-  let playerReady   = false;
-  let isSyncing     = false;
-  let pendingState  = null;
-  let pendingVideo  = null;
-  let ytAPIReady    = false;
-  const ytQ         = [];
+  let myName = '', player = null, playerReady = false;
+  let isSyncing = false, pendingState = null, pendingVideo = null;
+  let ytAPIReady = false;
+  const ytQ = [];
   let heartbeatTimer = null;
-  let drawerOpen    = false;
-  let msgKeys       = new Set();
-  let hasUnread     = false;
+  let msgKeys = new Set();
 
-  const isMobile = () => window.innerWidth < 640;
-
-  // ── YouTube API ──────────────────────────────────────────────────
+  // ── YouTube ──────────────────────────────────────────────────────
   window.onYouTubeIframeAPIReady = () => {
-    ytAPIReady = true;
-    ytQ.forEach(f => f());
-    ytQ.length = 0;
+    ytAPIReady = true; ytQ.forEach(f => f()); ytQ.length = 0;
     if (pendingVideo) { makePlayer(pendingVideo); pendingVideo = null; }
   };
   function withYT(fn) { if (ytAPIReady) fn(); else ytQ.push(fn); }
@@ -445,12 +358,12 @@
   function makePlayer(videoId) {
     if (!ytAPIReady) { pendingVideo = videoId; return; }
     document.getElementById('empty-state').style.display = 'none';
-    const wrapper = document.getElementById('yt-wrapper');
+    const block = document.getElementById('video-block');
     const old = document.getElementById('yt-player');
     if (old) old.remove();
     playerReady = false;
     const div = document.createElement('div'); div.id = 'yt-player';
-    wrapper.appendChild(div);
+    block.appendChild(div);
     player = new YT.Player('yt-player', {
       videoId,
       playerVars: { autoplay: 1, controls: 1, rel: 0, modestbranding: 1, playsinline: 1 },
@@ -462,77 +375,53 @@
         onStateChange: e => {
           if (isSyncing || !playerReady) return;
           const t = player.getCurrentTime();
-          if (e.data === YT.PlayerState.PLAYING)  { pushState('play',  t); startHeartbeat(); }
-          if (e.data === YT.PlayerState.PAUSED)   { pushState('pause', t); stopHeartbeat();  }
+          if (e.data === YT.PlayerState.PLAYING)  { pushState('play',  t); startHB(); }
+          if (e.data === YT.PlayerState.PAUSED)   { pushState('pause', t); stopHB();  }
         }
       }
     });
   }
 
-  // ── Heartbeat ────────────────────────────────────────────────────
-  function startHeartbeat() {
-    stopHeartbeat();
+  function startHB() {
+    stopHB();
     heartbeatTimer = setInterval(() => {
-      if (!player?.getCurrentTime || !playerReady) return;
-      if (player.getPlayerState() === YT.PlayerState.PLAYING)
-        set(ref(db, `${ROOM}/heartbeat`), { time: player.getCurrentTime(), by: myName, ts: Date.now() });
-    }, HEARTBEAT_INTERVAL);
+      if (!playerReady || player?.getPlayerState() !== YT.PlayerState.PLAYING) return;
+      set(ref(db, `${ROOM}/heartbeat`), { time: player.getCurrentTime(), by: myName, ts: Date.now() });
+    }, HEARTBEAT_MS);
   }
-  function stopHeartbeat() {
-    if (heartbeatTimer) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
-  }
+  function stopHB() { clearInterval(heartbeatTimer); heartbeatTimer = null; }
 
   // ── Utils ────────────────────────────────────────────────────────
-  function extractVideoId(url) {
+  function extractId(url) {
     const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
     return m ? m[1] : null;
   }
-  function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
-  function flashSyncPill() {
-    const pill = document.getElementById('sync-pill');
-    pill.classList.add('visible');
-    setTimeout(() => pill.classList.remove('visible'), 2000);
+  function setStatus(t) { document.getElementById('status-bar').textContent = t; }
+  function flashPill() {
+    const p = document.getElementById('sync-pill');
+    p.classList.add('on'); setTimeout(() => p.classList.remove('on'), 2000);
   }
+
+  window.scrollMsgs = () => {
+    setTimeout(() => {
+      const box = document.getElementById('messages');
+      box.scrollTop = box.scrollHeight;
+    }, 350); // wait for keyboard animation
+  };
 
   function addMsg(name, text, mine, sys = false) {
     const box = document.getElementById('messages');
-    const d   = document.createElement('div');
+    const d = document.createElement('div');
     d.className = 'msg' + (mine ? ' mine' : '') + (sys ? ' system' : '');
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    d.innerHTML = sys
-      ? `<div class="msg-body">${text}</div>`
-      : `<div class="msg-meta"><span class="msg-name">${name}</span><span>${now}</span></div>
-         <div class="msg-body">${text}</div>`;
+    if (sys) {
+      d.innerHTML = `<div class="msg-body">${text}</div>`;
+    } else {
+      d.innerHTML = `${!mine ? `<div class="msg-name">${name}</div>` : ''}
+        <div class="msg-body">${text}</div>`;
+    }
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
-
-    // unread dot on mobile if drawer closed and not own message
-    if (isMobile() && !drawerOpen && !mine && !sys) {
-      hasUnread = true;
-      document.getElementById('unread-dot').classList.add('visible');
-    }
   }
-
-  // ── Drawer (mobile) ──────────────────────────────────────────────
-  window.toggleDrawer = () => {
-    drawerOpen = !drawerOpen;
-    document.getElementById('msg-drawer').classList.toggle('open', drawerOpen);
-    if (drawerOpen) {
-      hasUnread = false;
-      document.getElementById('unread-dot').classList.remove('visible');
-      setTimeout(() => {
-        document.getElementById('messages').scrollTop = 999999;
-        document.getElementById('chat-input-mobile').focus();
-      }, 340);
-    }
-  };
-
-  // close drawer when tapping the video
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('yt-wrapper').addEventListener('click', () => {
-      if (drawerOpen) toggleDrawer();
-    });
-  });
 
   // ── Enter ────────────────────────────────────────────────────────
   window.enter = () => {
@@ -549,21 +438,16 @@
 
   // ── Presence ─────────────────────────────────────────────────────
   function setupPresence() {
-    const presRef = ref(db, `${ROOM}/presence/${myName}`);
-    set(presRef, { name: myName });
-    onDisconnect(presRef).remove();
+    const pr = ref(db, `${ROOM}/presence/${myName}`);
+    set(pr, { name: myName });
+    onDisconnect(pr).remove();
     onValue(ref(db, `${ROOM}/presence`), snap => {
-      const data   = snap.val() || {};
+      const data = snap.val() || {};
       const others = Object.keys(data).filter(u => u !== myName);
-      const dot    = document.getElementById('dot-partner');
-      const lbl    = document.getElementById('presence-label');
-      if (others.length) {
-        dot.classList.add('online');
-        lbl.textContent = others[0] + ' is here ♥';
-      } else {
-        dot.classList.remove('online');
-        lbl.textContent = 'waiting...';
-      }
+      const dot = document.getElementById('dot-partner');
+      const lbl = document.getElementById('presence-label');
+      if (others.length) { dot.classList.add('online'); lbl.textContent = others[0] + ' is here ♥'; }
+      else { dot.classList.remove('online'); lbl.textContent = 'waiting...'; }
     });
   }
 
@@ -572,8 +456,7 @@
     onValue(ref(db, `${ROOM}/video`), snap => {
       const v = snap.val();
       if (!v?.videoId) return;
-      const curId = player?.getVideoData?.()?.video_id;
-      if (v.videoId !== curId) makePlayer(v.videoId);
+      if (v.videoId !== player?.getVideoData?.()?.video_id) makePlayer(v.videoId);
     });
 
     onValue(ref(db, `${ROOM}/state`), snap => {
@@ -591,8 +474,8 @@
         isSyncing = true;
         player.seekTo(h.time + 0.3, true);
         if (player.getPlayerState() !== YT.PlayerState.PLAYING) player.playVideo();
-        setStatus(`↺ auto-synced (${drift.toFixed(1)}s drift)`);
-        flashSyncPill();
+        setStatus(`↺ synced (${drift.toFixed(1)}s)`);
+        flashPill();
         setTimeout(() => { isSyncing = false; }, 800);
       }
     });
@@ -611,8 +494,8 @@
     isSyncing = true;
     const lag = Math.min((Date.now() - (s.ts || Date.now())) / 1000, 5);
     player.seekTo(s.time + (s.action === 'play' ? lag : 0), true);
-    if (s.action === 'play')  { player.playVideo();  setStatus('▶ synced'); startHeartbeat(); }
-    if (s.action === 'pause') { player.pauseVideo(); setStatus('⏸ paused'); stopHeartbeat();  }
+    if (s.action === 'play')  { player.playVideo();  setStatus('▶ synced'); startHB(); }
+    if (s.action === 'pause') { player.pauseVideo(); setStatus('⏸ paused'); stopHB();  }
     setTimeout(() => { isSyncing = false; }, 800);
   }
 
@@ -624,7 +507,7 @@
   // ── Controls ─────────────────────────────────────────────────────
   window.loadVideo = () => {
     const url = document.getElementById('yt-url').value.trim();
-    const vid  = extractVideoId(url);
+    const vid = extractId(url);
     if (!vid) { setStatus('invalid url'); return; }
     set(ref(db, `${ROOM}/video`), { videoId: vid });
     setTimeout(() => pushState('pause', 0), 500);
@@ -633,20 +516,16 @@
 
   window.ctrlPlay = () => {
     if (!player || !playerReady) return;
-    player.playVideo(); pushState('play', player.getCurrentTime()); startHeartbeat();
+    player.playVideo(); pushState('play', player.getCurrentTime()); startHB();
   };
-
   window.ctrlPause = () => {
     if (!player || !playerReady) return;
-    player.pauseVideo(); pushState('pause', player.getCurrentTime()); stopHeartbeat();
+    player.pauseVideo(); pushState('pause', player.getCurrentTime()); stopHB();
   };
 
-  // ── Send message (reads whichever input is active) ───────────────
   window.sendMsg = () => {
-    const mobileInput  = document.getElementById('chat-input-mobile');
-    const desktopInput = document.getElementById('chat-input-desktop');
-    const input = isMobile() ? mobileInput : desktopInput;
-    const text  = input.value.trim();
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
     if (!text) return;
     push(ref(db, `${ROOM}/messages`), { name: myName, text, ts: Date.now() });
     input.value = '';
