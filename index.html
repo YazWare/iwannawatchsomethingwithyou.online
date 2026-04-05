@@ -50,14 +50,9 @@
     }
     .lobby-form button:active { background: var(--glow); }
 
-    /* ── APP SHELL ──
-       The whole trick: top-block is position:fixed so the browser
-       keyboard cannot touch it. chat-section fills the rest via JS.
-    */
     #app { display: none; }
     #app.on { display: block; }
 
-    /* top block: fixed, always visible */
     #top {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -66,7 +61,6 @@
       background: var(--bg);
     }
 
-    /* header */
     #hdr {
       display: flex; align-items: center; gap: 12px;
       height: 40px; padding: 0 14px;
@@ -81,7 +75,6 @@
     .dot.on { background: var(--accent); box-shadow: 0 0 6px var(--glow); }
     #plbl { font-size: 10px; color: var(--muted); }
 
-    /* url bar */
     #ubar {
       display: flex; align-items: center; gap: 8px;
       height: 48px; padding: 0 12px;
@@ -103,12 +96,14 @@
     }
     #ubar button:active { opacity: .7; }
 
-    /* video: 16:9 */
     #vid {
       width: 100%; aspect-ratio: 16/9;
       background: #000; position: relative; flex-shrink: 0;
     }
-    #vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+    #vid iframe, #vid video {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+    }
+    #vid video { object-fit: contain; background: #000; }
     #empty {
       position: absolute; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 10px; color: var(--muted);
@@ -116,7 +111,6 @@
     #empty svg { opacity: .2; }
     #empty p { font-size: 11px; letter-spacing: .1em; }
 
-    /* controls */
     #ctrls {
       display: flex; align-items: center; gap: 8px;
       height: 40px; padding: 0 12px;
@@ -132,11 +126,9 @@
     #spill { font-size: 9px; color: var(--accent2); border: 1px solid var(--accent2); border-radius: 20px; padding: 2px 7px; opacity: 0; transition: opacity .3s; }
     #spill.on { opacity: 1; }
 
-    /* chat section — JS positions this */
     #chat {
       position: fixed;
       left: 0; right: 0;
-      /* top + height set by JS */
       display: flex; flex-direction: column;
       background: var(--bg);
       z-index: 10;
@@ -161,7 +153,6 @@
     .msg.me .mbody { color: var(--accent); }
     .msg.sys .mbody { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); font-style: italic; }
 
-    /* input bar */
     #cbar {
       flex-shrink: 0;
       display: flex; align-items: center; gap: 8px;
@@ -231,7 +222,7 @@
       </div>
     </div>
     <div id="ubar">
-      <input id="yurl" placeholder="paste a youtube url…" inputmode="url" autocomplete="off"
+      <input id="yurl" placeholder="youtube or direct video url…" inputmode="url" autocomplete="off"
         onkeydown="if(event.key==='Enter'){event.preventDefault();loadVid()}"/>
       <button onclick="loadVid()">load</button>
     </div>
@@ -241,7 +232,7 @@
           <circle cx="12" cy="12" r="10"/>
           <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
         </svg>
-        <p>paste a youtube link above</p>
+        <p>paste a youtube or video link above</p>
       </div>
     </div>
     <div id="ctrls">
@@ -279,11 +270,12 @@ const FB = {
 const ROOM = "justus", DRIFT = 2.5, HB = 3000;
 const db = getDatabase(initializeApp(FB));
 
-let me='', player=null, ready=false, syncing=false;
+let me='', player=null, nativeVid=null, mode=null; // mode: 'yt' | 'native'
+let ready=false, syncing=false;
 let pendSt=null, pendVid=null, ytOk=false, hbTimer=null;
 const ytQ=[], seen=new Set();
 
-// ── layout: keep #chat pinned below #top, keyboard-aware ──────────
+// ── layout ────────────────────────────────────────────────────────
 function layout() {
   if (window.innerWidth >= 640) return;
   const topEl  = document.getElementById('top');
@@ -291,56 +283,124 @@ function layout() {
   if (!topEl || !chatEl) return;
   const topH = topEl.getBoundingClientRect().height;
   const vv   = window.visualViewport;
-  // visible bottom of screen (above keyboard)
   const visBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
   chatEl.style.top    = topH + 'px';
   chatEl.style.height = (visBottom - topH) + 'px';
 }
-
 window.visualViewport?.addEventListener('resize', layout);
 window.visualViewport?.addEventListener('scroll', layout);
 window.addEventListener('resize', layout);
 
-// ── YouTube ───────────────────────────────────────────────────────
+// ── YouTube API ───────────────────────────────────────────────────
 window.onYouTubeIframeAPIReady = () => {
   ytOk = true; ytQ.forEach(f=>f()); ytQ.length=0;
-  if (pendVid) { mkPlayer(pendVid); pendVid=null; }
+  if (pendVid) { mkYT(pendVid); pendVid=null; }
 };
 function ytScript() {
+  if (document.querySelector('script[src*="youtube.com/iframe_api"]')) return;
   const s=document.createElement('script'); s.src='https://www.youtube.com/iframe_api'; document.head.appendChild(s);
 }
-function mkPlayer(id) {
-  if (!ytOk) { pendVid=id; return; }
-  document.getElementById('empty').style.display='none';
-  const old=document.getElementById('yp'); if(old) old.remove();
-  ready=false;
-  const d=document.createElement('div'); d.id='yp';
+
+// ── detect url type ───────────────────────────────────────────────
+function ytId(url) {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function isDirectVideo(url) {
+  // matches .mp4, .webm, .ogg, .mkv, or archive.org links
+  return /\.(mp4|webm|ogg|mov|mkv)(\?|$)/i.test(url)
+    || url.includes('archive.org/download')
+    || url.includes('ia800');
+}
+
+// ── clear video area ──────────────────────────────────────────────
+function clearVid() {
+  const vidEl = document.getElementById('vid');
+  // remove YT iframe
+  const yp = document.getElementById('yp'); if (yp) yp.remove();
+  // remove native video
+  const nv = document.getElementById('nv'); if (nv) nv.remove();
+  player = null; nativeVid = null; mode = null; ready = false;
+  document.getElementById('empty').style.display = 'flex';
+}
+
+// ── make YouTube player ───────────────────────────────────────────
+function mkYT(id) {
+  if (!ytOk) { pendVid = id; ytScript(); return; }
+  clearVid();
+  mode = 'yt';
+  document.getElementById('empty').style.display = 'none';
+  const d = document.createElement('div'); d.id = 'yp';
   document.getElementById('vid').appendChild(d);
-  player=new YT.Player('yp',{
-    videoId:id,
-    playerVars:{autoplay:1,controls:1,rel:0,modestbranding:1,playsinline:1},
-    events:{
-      onReady:()=>{ ready=true; if(pendSt){applyS(pendSt);pendSt=null;} },
-      onStateChange:e=>{
-        if(syncing||!ready) return;
-        const t=player.getCurrentTime();
-        if(e.data===YT.PlayerState.PLAYING)  {pushS('play',t);  startHB();}
-        if(e.data===YT.PlayerState.PAUSED)   {pushS('pause',t); stopHB(); }
+  player = new YT.Player('yp', {
+    videoId: id,
+    playerVars: { autoplay:1, controls:1, rel:0, modestbranding:1, playsinline:1 },
+    events: {
+      onReady: () => { ready=true; if(pendSt){applyS(pendSt);pendSt=null;} },
+      onStateChange: e => {
+        if (syncing||!ready) return;
+        const t = player.getCurrentTime();
+        if (e.data===YT.PlayerState.PLAYING) { pushS('play',t);  startHB(); }
+        if (e.data===YT.PlayerState.PAUSED)  { pushS('pause',t); stopHB();  }
       }
     }
   });
 }
+
+// ── make native video player ──────────────────────────────────────
+function mkNative(url) {
+  clearVid();
+  mode = 'native';
+  document.getElementById('empty').style.display = 'none';
+  const v = document.createElement('video');
+  v.id = 'nv';
+  v.src = url;
+  v.controls = true;
+  v.playsInline = true;
+  v.preload = 'metadata'; // don't buffer everything on load
+  document.getElementById('vid').appendChild(v);
+  nativeVid = v;
+
+  v.addEventListener('canplay', () => {
+    ready = true;
+    if (pendSt) { applyS(pendSt); pendSt = null; }
+  });
+  v.addEventListener('play', () => {
+    if (syncing||!ready) return;
+    pushS('play', v.currentTime); startHB();
+  });
+  v.addEventListener('pause', () => {
+    if (syncing||!ready) return;
+    pushS('pause', v.currentTime); stopHB();
+  });
+  v.addEventListener('seeked', () => {
+    if (syncing) return;
+    // broadcast seek
+    pushS(v.paused ? 'pause' : 'play', v.currentTime);
+  });
+}
+
+// ── heartbeat ─────────────────────────────────────────────────────
 function startHB() {
   stopHB();
-  hbTimer=setInterval(()=>{
-    if(!ready||player?.getPlayerState()!==YT.PlayerState.PLAYING) return;
-    set(ref(db,`${ROOM}/hb`),{t:player.getCurrentTime(),by:me,ts:Date.now()});
-  },HB);
+  hbTimer = setInterval(() => {
+    const t = currentTime();
+    if (t === null) return;
+    const isPlaying = mode==='yt'
+      ? player?.getPlayerState()===YT.PlayerState.PLAYING
+      : nativeVid && !nativeVid.paused;
+    if (isPlaying) set(ref(db,`${ROOM}/hb`),{t,by:me,ts:Date.now()});
+  }, HB);
 }
 function stopHB() { clearInterval(hbTimer); hbTimer=null; }
 
+function currentTime() {
+  if (mode==='yt' && player?.getCurrentTime) return player.getCurrentTime();
+  if (mode==='native' && nativeVid) return nativeVid.currentTime;
+  return null;
+}
+
 // ── helpers ───────────────────────────────────────────────────────
-function yid(url) { const m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null; }
 function st(txt) { document.getElementById('stbar').textContent=txt; }
 function pill() { const p=document.getElementById('spill'); p.classList.add('on'); setTimeout(()=>p.classList.remove('on'),2000); }
 
@@ -356,51 +416,61 @@ function addMsg(name,text,mine,sys=false) {
 }
 
 // ── enter ─────────────────────────────────────────────────────────
-window.go=()=>{
-  const n=document.getElementById('nin').value.trim();
-  if(!n) return;
-  me=n;
+window.go = () => {
+  const n = document.getElementById('nin').value.trim();
+  if (!n) return;
+  me = n;
   document.getElementById('lobby').style.display='none';
   document.getElementById('app').classList.add('on');
-  requestAnimationFrame(()=>{ layout(); }); // size chat after app visible
-  ytScript(); presence(); listen();
-  push(ref(db,`${ROOM}/messages`),{name:'—',text:`${me} joined`,sys:true,ts:Date.now()});
+  requestAnimationFrame(layout);
+  presence(); listen();
 };
 
 // ── presence ──────────────────────────────────────────────────────
 function presence() {
-  const pr=ref(db,`${ROOM}/presence/${me}`);
+  const pr = ref(db,`${ROOM}/presence/${me}`);
   set(pr,{name:me}); onDisconnect(pr).remove();
-  onValue(ref(db,`${ROOM}/presence`),snap=>{
+  onValue(ref(db,`${ROOM}/presence`), snap=>{
     const d=snap.val()||{}, others=Object.keys(d).filter(u=>u!==me);
     const dot=document.getElementById('dp'), lbl=document.getElementById('plbl');
-    if(others.length){dot.classList.add('on');lbl.textContent=others[0]+' is here ♥';}
-    else{dot.classList.remove('on');lbl.textContent='waiting...';}
+    if (others.length) { dot.classList.add('on'); lbl.textContent=others[0]+' is here ♥'; }
+    else { dot.classList.remove('on'); lbl.textContent='waiting...'; }
   });
 }
 
 // ── listeners ─────────────────────────────────────────────────────
 function listen() {
-  onValue(ref(db,`${ROOM}/video`),snap=>{
-    const v=snap.val(); if(!v?.id) return;
-    if(v.id!==player?.getVideoData?.()?.video_id) mkPlayer(v.id);
+  onValue(ref(db,`${ROOM}/video`), snap=>{
+    const v=snap.val(); if(!v?.url) return;
+    // only reload if url changed
+    const curUrl = mode==='yt'
+      ? player?.getVideoData?.()?.video_id
+      : nativeVid?.src;
+    if (v.url===curUrl) return;
+    if (v.type==='yt') { ytScript(); mkYT(v.url); }
+    else mkNative(v.url);
   });
-  onValue(ref(db,`${ROOM}/state`),snap=>{
+
+  onValue(ref(db,`${ROOM}/state`), snap=>{
     const s=snap.val(); if(!s||s.by===me) return;
-    if(!ready){pendSt=s;return;} applyS(s);
+    if (!ready) { pendSt=s; return; }
+    applyS(s);
   });
-  onValue(ref(db,`${ROOM}/hb`),snap=>{
+
+  onValue(ref(db,`${ROOM}/hb`), snap=>{
     const h=snap.val(); if(!h||h.by===me||!ready) return;
-    const drift=Math.abs(player.getCurrentTime()-h.t);
-    if(drift>DRIFT){
+    const t=currentTime(); if(t===null) return;
+    const drift=Math.abs(t - h.t);
+    if (drift > DRIFT) {
       syncing=true;
-      player.seekTo(h.t+0.3,true);
-      if(player.getPlayerState()!==YT.PlayerState.PLAYING) player.playVideo();
+      seekTo(h.t + 0.3);
+      ensurePlaying();
       st(`↺ synced (${drift.toFixed(1)}s)`); pill();
-      setTimeout(()=>{syncing=false;},800);
+      setTimeout(()=>{ syncing=false; }, 800);
     }
   });
-  onValue(ref(db,`${ROOM}/messages`),snap=>{
+
+  onValue(ref(db,`${ROOM}/messages`), snap=>{
     const messages=snap.val(); if(!messages) return;
     Object.entries(messages).forEach(([k,m])=>{
       if(!seen.has(k)){seen.add(k);addMsg(m.name,m.text,m.name===me,m.sys);}
@@ -408,32 +478,71 @@ function listen() {
   });
 }
 
-function applyS(s) {
-  if(!player?.seekTo||!ready) return;
-  syncing=true;
-  const lag=Math.min((Date.now()-(s.ts||Date.now()))/1000,5);
-  player.seekTo(s.t+(s.a==='play'?lag:0),true);
-  if(s.a==='play'){player.playVideo();st('▶ synced');startHB();}
-  if(s.a==='pause'){player.pauseVideo();st('⏸ paused');stopHB();}
-  setTimeout(()=>{syncing=false;},800);
+function seekTo(t) {
+  if (mode==='yt') player?.seekTo(t, true);
+  else if (nativeVid) nativeVid.currentTime = t;
 }
-function pushS(a,t) {
+function ensurePlaying() {
+  if (mode==='yt') { if(player?.getPlayerState()!==YT.PlayerState.PLAYING) player.playVideo(); }
+  else if (nativeVid && nativeVid.paused) nativeVid.play();
+}
+
+function applyS(s) {
+  if (!ready) return;
+  syncing=true;
+  const lag = Math.min((Date.now()-(s.ts||Date.now()))/1000, 5);
+  seekTo(s.t + (s.a==='play' ? lag : 0));
+  if (s.a==='play')  { ensurePlaying(); st('▶ synced'); startHB(); }
+  if (s.a==='pause') {
+    if (mode==='yt') player.pauseVideo();
+    else if (nativeVid) nativeVid.pause();
+    st('⏸ paused'); stopHB();
+  }
+  setTimeout(()=>{ syncing=false; }, 800);
+}
+
+function pushS(a, t) {
   set(ref(db,`${ROOM}/state`),{a,t,by:me,ts:Date.now()});
-  st(a==='play'?'▶ playing':'⏸ paused');
+  st(a==='play' ? '▶ playing' : '⏸ paused');
 }
 
 // ── controls ──────────────────────────────────────────────────────
-window.loadVid=()=>{
-  const id=yid(document.getElementById('yurl').value.trim());
-  if(!id){st('invalid url');return;}
-  set(ref(db,`${ROOM}/video`),{id});
-  setTimeout(()=>pushS('pause',0),400);
-  push(ref(db,`${ROOM}/messages`),{name:'—',text:`${me} loaded a video`,sys:true,ts:Date.now()});
-};
-window.cPlay=()=>{ if(!ready) return; player.playVideo(); pushS('play',player.getCurrentTime()); startHB(); };
-window.cPause=()=>{ if(!ready) return; player.pauseVideo(); pushS('pause',player.getCurrentTime()); stopHB(); };
+window.loadVid = () => {
+  const url = document.getElementById('yurl').value.trim();
+  if (!url) return;
 
-window.send=()=>{
+  const id = ytId(url);
+  if (id) {
+    // YouTube
+    set(ref(db,`${ROOM}/video`),{url:id, type:'yt'});
+    ytScript(); mkYT(id);
+    setTimeout(()=>pushS('pause',0), 400);
+    push(ref(db,`${ROOM}/messages`),{name:'—',text:`${me} loaded a video`,sys:true,ts:Date.now()});
+  } else if (isDirectVideo(url) || url.startsWith('http')) {
+    // Direct / archive.org
+    set(ref(db,`${ROOM}/video`),{url, type:'native'});
+    mkNative(url);
+    setTimeout(()=>pushS('pause',0), 400);
+    push(ref(db,`${ROOM}/messages`),{name:'—',text:`${me} loaded a video`,sys:true,ts:Date.now()});
+  } else {
+    st('invalid url');
+  }
+};
+
+window.cPlay = () => {
+  if (!ready) return;
+  const t = currentTime() ?? 0;
+  ensurePlaying(); pushS('play', t); startHB();
+};
+window.cPause = () => {
+  if (!ready) return;
+  const t = currentTime() ?? 0;
+  if (mode==='yt') player.pauseVideo();
+  else if (nativeVid) nativeVid.pause();
+  pushS('pause', t); stopHB();
+};
+
+window.send = () => {
   const i=document.getElementById('cin'), t=i.value.trim(); if(!t) return;
   push(ref(db,`${ROOM}/messages`),{name:me,text:t,ts:Date.now()});
   i.value=''; i.focus();
