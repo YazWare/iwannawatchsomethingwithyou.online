@@ -424,6 +424,7 @@ window.go = () => {
   document.getElementById('app').classList.add('on');
   requestAnimationFrame(layout);
   presence(); listen();
+  push(ref(db,`${ROOM}/messages`),{name:'—',text:`${me} joined`,sys:true,ts:Date.now()});
 };
 
 // ── presence ──────────────────────────────────────────────────────
