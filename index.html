@@ -20,11 +20,10 @@
       --text:    #cff5f0;
       --muted:   #4a8a8a;
       --glow:    rgba(0,212,180,0.18);
-      --glass-bg: rgba(2,14,20,0.42);
-      --glass-bg-heavy: rgba(2,10,16,0.62);
+      --glass-bg: rgba(2,14,20,0.62);
+      --glass-bg-heavy: rgba(2,10,16,0.92);
       --glass-border: rgba(0,255,200,0.1);
       --glass-border-glow: rgba(0,255,200,0.22);
-      --glass-blur: blur(12px) saturate(220%);
       --glass-shine: linear-gradient(135deg, rgba(0,255,200,0.07) 0%, rgba(0,150,180,0.03) 40%, transparent 70%);
     }
 
@@ -40,12 +39,10 @@
       position: fixed; inset: 0; z-index: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      /* boost saturation + slight brightness for Pandora vibes */
       filter: saturate(2.4) brightness(0.75) hue-rotate(-5deg);
       pointer-events: none;
     }
 
-    /* dark overlay so UI stays readable */
     #bg-overlay {
       position: fixed; inset: 0; z-index: 1;
       pointer-events: none;
@@ -53,7 +50,6 @@
         radial-gradient(ellipse 100% 100% at 50% 50%, rgba(2,13,18,0.1) 0%, rgba(2,8,14,0.1) 100%);
     }
 
-    /* bioluminescent spore particles on top of video */
     #bg-spores {
       position: fixed; inset: 0; z-index: 2; pointer-events: none;
       background-image:
@@ -88,9 +84,7 @@
 
     .lobby-emblem {
       width: 80px; height: 80px; border-radius: 50%;
-      background: rgba(0,30,24,0.35);
-      backdrop-filter: blur(24px) saturate(250%);
-      -webkit-backdrop-filter: blur(24px) saturate(250%);
+      background: rgba(0,22,18,0.88);
       border: 1px solid rgba(0,255,200,0.22);
       display: flex; align-items: center; justify-content: center;
       box-shadow:
@@ -129,11 +123,9 @@
 
     .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px, 90vw); }
     .lobby-form input {
-      background: rgba(2,14,20,0.5);
-      backdrop-filter: blur(28px) saturate(220%);
-      -webkit-backdrop-filter: blur(28px) saturate(220%);
+      background: rgba(2,14,20,0.88);
       border: 1px solid rgba(0,212,180,0.2);
-      box-shadow: inset 0 1px 0 rgba(0,255,200,0.07), 0 8px 32px rgba(0,0,0,0.4), 0 0 0 0 transparent;
+      box-shadow: inset 0 1px 0 rgba(0,255,200,0.07), 0 8px 32px rgba(0,0,0,0.4);
       color: var(--text); font-family: 'Raleway', sans-serif;
       font-size: 16px; padding: 14px 16px; border-radius: 6px; outline: none;
       text-align: center; letter-spacing: .1em; font-weight: 200;
@@ -145,9 +137,7 @@
       box-shadow: 0 0 0 3px rgba(0,212,180,0.1), 0 0 30px rgba(0,212,180,0.15), inset 0 1px 0 rgba(0,255,200,0.08);
     }
     .lobby-form button {
-      background: rgba(0,212,180,0.1);
-      backdrop-filter: blur(28px) saturate(220%);
-      -webkit-backdrop-filter: blur(28px) saturate(220%);
+      background: rgba(4,20,28,0.88);
       border: 1px solid rgba(0,212,180,0.32);
       box-shadow: 0 0 24px rgba(0,212,180,0.12), inset 0 1px 0 rgba(0,255,200,0.12), 0 8px 32px rgba(0,0,0,0.3);
       color: var(--accent); font-family: 'Cinzel', sans-serif;
@@ -179,21 +169,14 @@
       z-index: 20; display: flex; flex-direction: column;
     }
 
-    /* GLASS MIXIN for all panels */
-    #hdr, #ubar, #ctrls, #chat, #cbar {
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-    }
-
     #hdr {
       display: flex; align-items: center; gap: 12px;
       height: 44px; padding: 0 16px;
-      background: rgba(2,12,18,0.45);
+      background: rgba(2,12,18,0.70);
       border-bottom: 1px solid rgba(0,255,200,0.09);
       box-shadow: 0 1px 0 rgba(0,255,200,0.05), 0 4px 24px rgba(0,0,0,0.35);
       position: relative;
     }
-    /* shine strip on header */
     #hdr::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 1px;
@@ -217,15 +200,13 @@
     #ubar {
       display: flex; align-items: center; gap: 8px;
       height: 46px; padding: 0 12px;
-      background: rgba(2,10,16,0.4);
+      background: rgba(2,10,16,0.68);
       border-bottom: 1px solid rgba(0,255,200,0.06);
       box-shadow: 0 2px 16px rgba(0,0,0,0.25);
     }
     #ubar input {
       flex: 1; min-width: 0;
-      background: rgba(0,255,200,0.05);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(2,16,22,0.80);
       border: 1px solid rgba(0,212,180,0.12);
       box-shadow: inset 0 1px 0 rgba(0,255,200,0.05);
       color: var(--text); font-family: 'Raleway', sans-serif;
@@ -237,9 +218,7 @@
     #ubar input::placeholder { color: var(--muted); font-size: 12px; }
     #ubar button {
       flex-shrink: 0;
-      background: rgba(0,153,170,0.18);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(4,22,30,0.85);
       border: 1px solid rgba(0,153,170,0.32);
       box-shadow: inset 0 1px 0 rgba(0,255,200,0.1), 0 0 14px rgba(0,153,170,0.12);
       color: var(--accent); font-family: 'Cinzel', serif; font-size: 10px;
@@ -257,7 +236,6 @@
     }
     #vid video { object-fit: contain; background: rgba(0,0,0,0.6); }
 
-    /* glass vignette around video */
     #vid::after {
       content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
       box-shadow: inset 0 0 50px rgba(0,0,0,0.45);
@@ -266,9 +244,7 @@
     #empty {
       position: absolute; inset: 0; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 12px; z-index: 2;
-      background: rgba(2,10,16,0.6);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(2,10,16,0.90);
     }
     .empty-icon { width: 48px; height: 48px; opacity: .22; filter: drop-shadow(0 0 8px var(--accent)) drop-shadow(0 0 16px rgba(0,212,180,0.4)); }
     #empty p { font-size: 11px; color: var(--muted); letter-spacing: .15em; font-weight: 300; }
@@ -276,13 +252,11 @@
     #ctrls {
       display: flex; align-items: center; gap: 8px;
       height: 38px; padding: 0 12px;
-      background: rgba(2,10,16,0.4);
+      background: rgba(2,10,16,0.68);
       border-bottom: 1px solid rgba(0,255,200,0.06);
     }
     .cb {
-      background: rgba(0,255,200,0.05);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(2,16,22,0.80);
       border: 1px solid rgba(0,212,180,0.14);
       box-shadow: inset 0 1px 0 rgba(0,255,200,0.06);
       color: var(--text); border-radius: 3px; padding: 4px 12px; font-size: 11px;
@@ -295,7 +269,6 @@
       font-size: 9px; color: var(--accent);
       border: 1px solid rgba(0,212,180,0.25);
       background: rgba(0,212,180,0.07);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
       border-radius: 20px; padding: 2px 8px; opacity: 0; transition: opacity .3s;
       letter-spacing: .08em; font-family: 'Cinzel', serif;
     }
@@ -305,20 +278,16 @@
     #chat {
       position: fixed; left: 0; right: 0;
       display: flex; flex-direction: column;
-      background: rgba(2,8,14,0.2);
-      backdrop-filter: blur(12px) saturate(240%);
-      -webkit-backdrop-filter: blur(12px) saturate(240%);
+      background: rgba(2,8,14,0.58);
       z-index: 10;
       border-top: 1px solid rgba(0,255,200,0.08);
     }
-    /* glow line top of chat */
     #chat::before {
       content: '';
       position: absolute; top: -1px; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(0,153,170,0.45), rgba(0,255,200,0.75), rgba(0,153,170,0.45), transparent);
       opacity: .65;
     }
-    /* subtle inner shimmer */
     #chat::after {
       content: '';
       position: absolute; top: 0; left: 0; right: 0; height: 80px;
@@ -339,11 +308,8 @@
       font-family: 'Raleway', sans-serif; font-size: 16px;
       font-weight: 300; color: var(--text); line-height: 1.4;
     }
-    /* glass bubbles */
     .msg:not(.sys) .mbody {
-      background: rgba(0,255,200,0.05);
-      backdrop-filter: blur(16px) saturate(200%);
-      -webkit-backdrop-filter: blur(16px) saturate(200%);
+      background: rgba(0,30,24,0.75);
       border: 1px solid rgba(0,255,200,0.08);
       box-shadow: inset 0 1px 0 rgba(0,255,200,0.06), 0 2px 12px rgba(0,0,0,0.2);
       border-radius: 14px; padding: 8px 14px;
@@ -354,14 +320,14 @@
       color: var(--glow1);
       text-shadow: 0 0 12px rgba(0,255,180,0.4), 0 0 24px rgba(0,255,180,0.12);
       border-color: rgba(0,255,180,0.16);
-      background: rgba(0,255,180,0.07);
+      background: rgba(0,40,28,0.80);
       box-shadow: 0 0 18px rgba(0,255,180,0.1), inset 0 1px 0 rgba(0,255,200,0.1);
     }
     .msg.sys { align-items: center; }
     .msg.sys .mbody {
       font-size: 10px; color: var(--muted); font-style: italic;
       letter-spacing: .08em; background: none; border: none;
-      box-shadow: none; backdrop-filter: none; padding: 0;
+      box-shadow: none; padding: 0;
     }
 
     #cbar {
@@ -369,16 +335,12 @@
       display: flex; align-items: center; gap: 8px;
       padding: 8px 12px;
       padding-bottom: max(8px, env(safe-area-inset-bottom));
-      background: rgba(2,8,14,0.55);
-      backdrop-filter: blur(24px) saturate(220%);
-      -webkit-backdrop-filter: blur(24px) saturate(220%);
+      background: rgba(2,8,14,0.72);
       border-top: 1px solid rgba(0,255,200,0.07);
     }
     #cbar input {
       flex: 1; min-width: 0;
-      background: rgba(0,255,200,0.05);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(2,16,22,0.80);
       border: 1px solid rgba(0,212,180,0.16);
       box-shadow: inset 0 1px 0 rgba(0,255,200,0.06);
       color: var(--text); font-family: 'Raleway', sans-serif;
@@ -390,9 +352,7 @@
     #cbar input::placeholder { color: var(--muted); font-style: italic; font-size: 14px; }
     #sbtn {
       flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
-      background: rgba(0,153,170,0.2);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(4,22,30,0.85);
       border: 1px solid rgba(0,212,180,0.32);
       box-shadow: 0 0 18px rgba(0,212,180,0.14), inset 0 1px 0 rgba(0,255,200,0.12);
       color: var(--accent); font-size: 15px; cursor: pointer;
@@ -497,6 +457,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+// seek bg video to t=120 once it can play
+const bgVid = document.getElementById('bg-video');
+bgVid.addEventListener('canplay', () => { if (bgVid.currentTime < 120) bgVid.currentTime = 120; }, { once: true });
+
 const FB = {
   apiKey: "AIzaSyBSEbVyZtl0qTHvzprqhielKPWL8vYTOw4",
   authDomain: "iwannawatchsomethingwithyou.firebaseapp.com",
@@ -515,7 +479,7 @@ let ready=false, syncing=false;
 let pendSt=null, pendVid=null, ytOk=false, hbTimer=null;
 const ytQ=[], seen=new Set();
 
-// ── AMBIENT AUDIO (separate from bg video which is muted) ─────────
+// ── AMBIENT AUDIO ─────────────────────────────────────────────────
 const ambience = new Audio("https://ia600708.us.archive.org/8/items/avatar-the-way-of-water-ocean-ambient-soundscape-om-2h-kik-sq-9o/Avatar%EF%BC%9A%20The%20Way%20of%20Water%20%EF%BD%9C%20Ocean%20%EF%BD%9C%20Ambient%20Soundscape%20%5Bom2hKIkSQ9o%5D.m4a");
 ambience.loop = true;
 const MAX_VOL = 0.08;
