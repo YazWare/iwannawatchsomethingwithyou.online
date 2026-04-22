@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
+  <title>goodnight my dear</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;500&family=Raleway:ital,wght@0,200;0,300;1,200;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #020d12;
+      --bg2:     #041820;
+      --bg3:     #062030;
+      --border:  rgba(0,210,180,0.12);
+      --accent:  #00d4b4;
+      --accent2: #0099aa;
+      --glow1:   #00ffcc;
+      --glow2:   #4dffb4;
+      --text:    #cff5f0;
+      --muted:   #4a8a8a;
+      --glow:    rgba(0,212,180,0.18);
+      --glass-bg: rgba(2,14,20,0.62);
+      --glass-bg-heavy: rgba(2,10,16,0.92);
+      --glass-border: rgba(0,255,200,0.1);
+      --glass-border-glow: rgba(0,255,200,0.22);
+    }
+
+    html, body {
+      height: 100%; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: 'Raleway', sans-serif; font-size: 13px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── VIDEO BACKGROUND ── */
+    #bg-video {
+      position: fixed; inset: 0; z-index: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: saturate(2.4) brightness(0.75) hue-rotate(-5deg);
+      pointer-events: none;
+    }
+    #bg-overlay {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(ellipse 100% 100% at 50% 50%, rgba(2,13,18,0.1) 0%, rgba(2,8,14,0.1) 100%);
+    }
+    #bg-spores {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background-image:
+        radial-gradient(circle 3px at 12% 25%, rgba(0,255,180,0.95) 0%, transparent 100%),
+        radial-gradient(circle 2px at 35% 65%, rgba(0,220,200,0.85) 0%, transparent 100%),
+        radial-gradient(circle 4px at 62% 18%, rgba(100,255,180,0.75) 0%, transparent 100%),
+        radial-gradient(circle 3px at 78% 52%, rgba(0,200,160,0.9) 0%, transparent 100%),
+        radial-gradient(circle 2px at 22% 80%, rgba(0,255,200,0.7) 0%, transparent 100%),
+        radial-gradient(circle 5px at 88% 8%,  rgba(0,180,220,0.8) 0%, transparent 100%),
+        radial-gradient(circle 2px at 50% 88%, rgba(120,255,180,0.65) 0%, transparent 100%),
+        radial-gradient(circle 4px at 8%  48%, rgba(0,210,180,0.75) 0%, transparent 100%),
+        radial-gradient(circle 2px at 42% 35%, rgba(180,255,200,0.55) 0%, transparent 100%),
+        radial-gradient(circle 3px at 95% 65%, rgba(0,255,160,0.65) 0%, transparent 100%),
+        radial-gradient(circle 2px at 18% 10%, rgba(0,200,255,0.55) 0%, transparent 100%),
+        radial-gradient(circle 3px at 68% 92%, rgba(0,255,180,0.7) 0%, transparent 100%);
+      animation: sporeFloat 22s ease-in-out infinite alternate;
+      filter: blur(0.3px);
+    }
+    @keyframes sporeFloat {
+      0%   { transform: translateY(0px) translateX(0px); opacity: .9; }
+      50%  { transform: translateY(-14px) translateX(6px); opacity: .55; }
+      100% { transform: translateY(-28px) translateX(-4px); opacity: .3; }
+    }
+
+    /* ── MOON PARTICLES ── */
+    #moonparticles {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden;
+    }
+    .mote {
+      position: absolute; border-radius: 50%;
+      background: radial-gradient(circle, rgba(200,240,255,0.9), transparent);
+      animation: moteFloat linear infinite;
+      opacity: 0;
+    }
+    @keyframes moteFloat {
+      0%   { transform: translateY(110vh) translateX(0); opacity: 0; }
+      10%  { opacity: .6; }
+      90%  { opacity: .2; }
+      100% { transform: translateY(-10vh) translateX(var(--drift)); opacity: 0; }
+    }
+
+    /* ── CLICK TO CONTINUE ── */
+    #ctc {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px; background: #020d12; cursor: pointer; transition: opacity .6s ease;
+    }
+    #ctc.hide { opacity: 0; pointer-events: none; }
+    .ctc-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      color: rgba(0,255,200,0.6);
+      font-family: 'Cinzel', serif; font-size: 11px;
+      letter-spacing: .3em; text-transform: uppercase;
+      animation: ctcPulse 2.5s ease-in-out infinite;
+    }
+    .ctc-moon { font-size: 32px; filter: drop-shadow(0 0 18px rgba(180,230,255,0.7)); }
+    @keyframes ctcPulse {
+      0%,100% { opacity: .5; transform: translateY(0); }
+      50%      { opacity: 1;  transform: translateY(-6px); }
+    }
+
+    /* ── LOBBY ── */
+    #lobby {
+      position: fixed; inset: 0; z-index: 100;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 36px; padding: 24px;
+    }
+    .lobby-emblem {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(0,22,18,0.88);
+      border: 1px solid rgba(0,255,200,0.22);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 50px rgba(0,212,180,0.25), 0 0 100px rgba(0,180,150,0.12),
+        inset 0 0 30px rgba(0,100,80,0.12), inset 0 1px 0 rgba(0,255,200,0.18);
+      animation: emblemPulse 4s ease-in-out infinite;
+      position: relative; font-size: 30px;
+    }
+    .lobby-emblem::before {
+      content: ''; position: absolute; inset: 8px; border-radius: 50%;
+      border: 1px solid rgba(0,255,180,0.12);
+      background: radial-gradient(circle at 35% 35%, rgba(0,255,200,0.07), transparent 70%);
+    }
+    @keyframes emblemPulse {
+      0%,100% { box-shadow: 0 0 50px rgba(0,212,180,0.25),0 0 100px rgba(0,180,150,0.12),inset 0 0 30px rgba(0,100,80,0.12),inset 0 1px 0 rgba(0,255,200,0.18); }
+      50%      { box-shadow: 0 0 70px rgba(0,212,180,0.4),0 0 140px rgba(0,180,150,0.2),inset 0 0 45px rgba(0,150,120,0.18),inset 0 1px 0 rgba(0,255,200,0.24); }
+    }
+    .lobby-text { text-align: center; display: flex; flex-direction: column; gap: 8px; }
+    .lobby-title {
+      font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 6vw, 3rem);
+      font-weight: 300; color: var(--text); letter-spacing: .08em;
+      text-shadow: 0 0 40px rgba(0,212,180,0.7), 0 0 80px rgba(0,180,150,0.3), 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .lobby-sub {
+      font-family: 'Raleway', sans-serif; font-size: 10px; color: var(--muted);
+      letter-spacing: .3em; text-transform: uppercase; font-weight: 300; font-style: italic;
+    }
+    .lobby-form { display: flex; flex-direction: column; gap: 12px; width: min(300px, 90vw); }
+    .lobby-form input {
+      background: rgba(2,14,20,0.88); border: 1px solid rgba(0,212,180,0.2);
+      box-shadow: inset 0 1px 0 rgba(0,255,200,0.07), 0 8px 32px rgba(0,0,0,0.4);
+      color: var(--text); font-family: 'Raleway', sans-serif;
+      font-size: 16px; padding: 14px 16px; border-radius: 6px; outline: none;
+      text-align: center; letter-spacing: .1em; font-weight: 200; transition: border-color .3s, box-shadow .3s;
+    }
+    .lobby-form input::placeholder { color: var(--muted); }
+    .lobby-form input:focus {
+      border-color: rgba(0,212,180,0.5);
+      box-shadow: 0 0 0 3px rgba(0,212,180,0.1), 0 0 30px rgba(0,212,180,0.15), inset 0 1px 0 rgba(0,255,200,0.08);
+    }
+    .lobby-form button {
+      background: rgba(4,20,28,0.88); border: 1px solid rgba(0,212,180,0.32);
+      box-shadow: 0 0 24px rgba(0,212,180,0.12), inset 0 1px 0 rgba(0,255,200,0.12), 0 8px 32px rgba(0,0,0,0.3);
+      color: var(--accent); font-family: 'Cinzel', sans-serif;
+      font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+      padding: 14px; border-radius: 6px; cursor: pointer; transition: all .3s; position: relative; overflow: hidden;
+    }
+    .lobby-form button::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,255,200,0.1), rgba(0,150,180,0.05), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .lobby-form button:hover::before { opacity: 1; }
+    .lobby-form button:hover { border-color: rgba(0,212,180,0.5); }
+    .lobby-form button:active { background: rgba(0,212,180,0.18); }
+    .watch-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: transparent;
+      border: 1px solid rgba(0,212,180,0.18);
+      color: var(--muted); font-family: 'Cinzel', serif;
+      font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+      padding: 11px 14px; border-radius: 6px; cursor: pointer; transition: all .3s;
+      text-decoration: none; width: 100%;
+    }
+    .watch-btn:hover { color: var(--accent); border-color: rgba(0,212,180,0.35); }
+    .watch-divider {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--muted); font-size: 9px; letter-spacing: .2em;
+    }
+    .watch-divider::before, .watch-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(0,212,180,0.1);
+    }
+
+    /* ── APP LAYOUT ── */
+    #app { display: none; position: relative; z-index: 3; }
+    #app.on { display: block; }
+
+    /* ── HEADER ── */
+    #hdr {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+      display: flex; align-items: center; gap: 12px;
+      height: 44px; padding: 0 16px;
+      background: rgba(2,12,18,0.70);
+      border-bottom: 1px solid rgba(0,255,200,0.09);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+    }
+    #hdr::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,200,0.2), rgba(0,255,200,0.35), rgba(0,255,200,0.2), transparent);
+    }
+    .htitle {
+      font-family: 'Cinzel', serif; font-size: 1rem;
+      font-weight: 300; color: var(--accent); letter-spacing: .15em; margin-right: auto;
+      text-shadow: 0 0 20px rgba(0,212,180,0.6), 0 0 40px rgba(0,180,150,0.25);
+    }
+    .dots { display: flex; gap: 6px; align-items: center; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: all .4s; }
+    .dot.on { background: var(--glow1); box-shadow: 0 0 8px var(--glow1), 0 0 18px rgba(0,255,200,0.35); }
+    #plbl { font-size: 10px; color: var(--muted); letter-spacing: .08em; font-weight: 300; }
+
+    /* ── TABS ── */
+    #tabs {
+      position: fixed; top: 44px; left: 0; right: 0; z-index: 20;
+      display: flex; height: 38px;
+      background: rgba(2,10,16,0.72);
+      border-bottom: 1px solid rgba(0,255,200,0.08);
+    }
+    .tab {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--muted); cursor: pointer; border: none; background: none;
+      transition: all .25s; position: relative;
+    }
+    .tab::after {
+      content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 1px;
+      background: var(--accent); opacity: 0; transition: opacity .25s;
+    }
+    .tab.active { color: var(--accent); }
+    .tab.active::after { opacity: 1; }
+
+    /* ── MAIN CONTENT AREA ── */
+    #main {
+      position: fixed; top: 82px; left: 0; right: 0; bottom: 0;
+      z-index: 10; display: flex; flex-direction: column;
+    }
+
+    /* ── SLEEP PANEL ── */
+    #sleep-panel {
+      flex: 1; overflow-y: auto; padding: 16px 14px 80px;
+      display: flex; flex-direction: column; gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    #sleep-panel::-webkit-scrollbar { width: 0; }
+
+    /* currently playing bar */
+    #nowplaying {
+      background: rgba(0,20,16,0.85);
+      border: 1px solid rgba(0,255,200,0.14);
+      box-shadow: 0 0 30px rgba(0,212,180,0.08), inset 0 1px 0 rgba(0,255,200,0.08);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .np-label { font-size: 9px; color: var(--muted); letter-spacing: .25em; text-transform: uppercase; font-family: 'Cinzel', serif; }
+    .np-title {
+      font-family: 'Cinzel', serif; font-size: 13px; color: var(--text);
+      letter-spacing: .06em; min-height: 18px;
+      text-shadow: 0 0 20px rgba(0,212,180,0.4);
+    }
+    .np-controls { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .np-btn {
+      background: rgba(2,16,22,0.80); border: 1px solid rgba(0,212,180,0.18);
+      color: var(--text); border-radius: 4px; padding: 5px 14px; font-size: 13px;
+      cursor: pointer; transition: all .2s; touch-action: manipulation;
+    }
+    .np-btn:active { border-color: var(--accent); color: var(--accent); }
+    #vol-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+    #vol-wrap span { font-size: 10px; color: var(--muted); }
+    #vol {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 3px; border-radius: 2px; outline: none;
+      background: linear-gradient(to right, var(--accent) 0%, var(--accent) 70%, rgba(0,212,180,0.2) 70%);
+      cursor: pointer;
+    }
+    #vol::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--glow1); box-shadow: 0 0 8px rgba(0,255,200,0.5);
+    }
+    #sync-pill {
+      font-size: 9px; color: var(--accent);
+      border: 1px solid rgba(0,212,180,0.25);
+      background: rgba(0,212,180,0.07);
+      border-radius: 20px; padding: 2px 8px; opacity: 0; transition: opacity .3s;
+      letter-spacing: .08em; font-family: 'Cinzel', serif; align-self: flex-end;
+    }
+    #sync-pill.on { opacity: 1; }
+
+    /* add track */
+    #addtrack {
+      display: flex; gap: 8px;
+    }
+    #addtrack input {
+      flex: 1; background: rgba(2,14,20,0.80); border: 1px solid rgba(0,212,180,0.14);
+      color: var(--text); font-family: 'Raleway', sans-serif; font-size: 14px; font-weight: 200;
+      padding: 9px 12px; border-radius: 6px; outline: none; transition: border-color .2s;
+    }
+    #addtrack input:focus { border-color: rgba(0,212,180,0.4); }
+    #addtrack input::placeholder { color: var(--muted); font-size: 11px; }
+    #addtrack button {
+      background: rgba(4,20,28,0.85); border: 1px solid rgba(0,153,170,0.32);
+      color: var(--accent); font-family: 'Cinzel', serif; font-size: 10px;
+      letter-spacing: .12em; padding: 9px 14px; border-radius: 6px; cursor: pointer; transition: all .2s;
+    }
+    #addtrack button:active { background: rgba(0,153,170,0.22); }
+
+    /* track list */
+    .section-label {
+      font-size: 9px; color: var(--muted); letter-spacing: .25em;
+      text-transform: uppercase; font-family: 'Cinzel', serif; padding: 0 2px;
+    }
+    #tracklist { display: flex; flex-direction: column; gap: 6px; }
+    .track {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(0,20,16,0.65); border: 1px solid rgba(0,255,200,0.08);
+      border-radius: 8px; padding: 10px 12px; cursor: pointer;
+      transition: all .2s; position: relative; overflow: hidden;
+    }
+    .track::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,255,200,0.06), transparent);
+      opacity: 0; transition: opacity .2s;
+    }
+    .track:hover::before, .track:active::before { opacity: 1; }
+    .track.playing {
+      border-color: rgba(0,255,200,0.28);
+      box-shadow: 0 0 20px rgba(0,212,180,0.1), inset 0 1px 0 rgba(0,255,200,0.1);
+    }
+    .track-icon {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(0,40,30,0.9); border: 1px solid rgba(0,212,180,0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+      transition: all .25s;
+    }
+    .track.playing .track-icon {
+      border-color: var(--accent); box-shadow: 0 0 12px rgba(0,212,180,0.3);
+      animation: iconBreath 2.5s ease-in-out infinite;
+    }
+    @keyframes iconBreath {
+      0%,100% { box-shadow: 0 0 12px rgba(0,212,180,0.3); }
+      50%      { box-shadow: 0 0 24px rgba(0,255,200,0.5); }
+    }
+    .track-info { flex: 1; min-width: 0; }
+    .track-name {
+      font-family: 'Cinzel', serif; font-size: 11px; color: var(--text);
+      letter-spacing: .06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .track.playing .track-name { color: var(--glow1); text-shadow: 0 0 12px rgba(0,255,200,0.4); }
+    .track-url { font-size: 9px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-dur { font-size: 9px; color: rgba(0,212,180,0.5); font-family: 'Cinzel', serif; flex-shrink: 0; letter-spacing: .06em; }
+    .track-del {
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+      background: transparent; border: none; color: rgba(0,212,180,0.3);
+      font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color .2s; touch-action: manipulation;
+    }
+    .track-del:hover { color: rgba(255,100,80,0.6); }
+
+    /* ── CHAT PANEL ── */
+    #chat-panel {
+      flex: 1; display: none; flex-direction: column;
+    }
+    #chat-panel.active { display: flex; }
+    #messages {
+      flex: 1; overflow-y: auto; padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 8px;
+      overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    }
+    #messages::-webkit-scrollbar { width: 0; }
+    .msg { display: flex; flex-direction: column; gap: 3px; }
+    .mname { font-size: 9px; color: var(--accent2); letter-spacing: .1em; text-transform: uppercase; font-family: 'Cinzel', serif; }
+    .mbody {
+      font-family: 'Raleway', sans-serif; font-size: 15px;
+      font-weight: 300; color: var(--text); line-height: 1.4;
+    }
+    .msg:not(.sys) .mbody {
+      background: rgba(0,30,24,0.75); border: 1px solid rgba(0,255,200,0.08);
+      box-shadow: inset 0 1px 0 rgba(0,255,200,0.06), 0 2px 12px rgba(0,0,0,0.2);
+      border-radius: 14px; padding: 8px 14px; max-width: 85%;
+    }
+    .msg.me { align-items: flex-end; }
+    .msg.me .mbody {
+      color: var(--glow1);
+      text-shadow: 0 0 12px rgba(0,255,180,0.4), 0 0 24px rgba(0,255,180,0.12);
+      border-color: rgba(0,255,180,0.16); background: rgba(0,40,28,0.80);
+      box-shadow: 0 0 18px rgba(0,255,180,0.1), inset 0 1px 0 rgba(0,255,200,0.1);
+    }
+    .msg.sys { align-items: center; }
+    .msg.sys .mbody {
+      font-size: 10px; color: var(--muted); font-style: italic;
+      letter-spacing: .08em; background: none; border: none; box-shadow: none; padding: 0;
+    }
+
+    /* chat input */
+    #cbar {
+      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+      background: rgba(2,8,14,0.72); border-top: 1px solid rgba(0,255,200,0.07);
+    }
+    #cin {
+      flex: 1; min-width: 0;
+      background: rgba(2,16,22,0.80); border: 1px solid rgba(0,212,180,0.16);
+      box-shadow: inset 0 1px 0 rgba(0,255,200,0.06);
+      color: var(--text); font-family: 'Raleway', sans-serif;
+      font-size: 16px; font-weight: 200;
+      padding: 9px 16px; border-radius: 22px; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    #cin:focus { border-color: rgba(0,212,180,0.38); box-shadow: 0 0 18px rgba(0,212,180,0.12); }
+    #cin::placeholder { color: var(--muted); font-style: italic; font-size: 13px; }
+    #sbtn {
+      flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(4,22,30,0.85); border: 1px solid rgba(0,212,180,0.32);
+      box-shadow: 0 0 18px rgba(0,212,180,0.14), inset 0 1px 0 rgba(0,255,200,0.12);
+      color: var(--accent); font-size: 15px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      touch-action: manipulation; transition: all .2s;
+    }
+    #sbtn:active { background: rgba(0,153,170,0.38); }
+
+    /* ── DESKTOP ── */
+    @media (min-width: 640px) {
+      #app.on {
+        display: grid; height: 100vh;
+        grid-template-columns: 1fr 300px;
+        grid-template-rows: 44px 38px 1fr;
+        grid-template-areas: "h h" "tb tb" "s c";
+      }
+      #hdr   { position: static; grid-area: h; }
+      #tabs  { position: static; grid-area: tb; top: auto; }
+      #main  { position: static; grid-area: s; top: auto; display: block; overflow: hidden; }
+      #sleep-panel { height: 100%; }
+
+      /* right column is always chat */
+      #main-chat {
+        grid-area: c;
+        position: static;
+        display: flex !important;
+        flex-direction: column;
+        border-left: 1px solid rgba(0,255,200,0.08);
+        background: rgba(2,8,14,0.58);
+        height: 100%;
+      }
+      /* hide tab-based chat panel */
+      #chat-panel { display: none !important; }
+      #tabs { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<video id="bg-video" autoplay muted loop playsinline preload="none"
+  src="https://archive.org/download/avatar-peaceful-forests-of-pandora-music-ambience-in-4-k-w-videogameworlds-6kvg-3od-f-854_202604/Avatar%20%EF%BD%9C%20Peaceful%20Forests%20of%20Pandora%20Music%20%26%20Ambience%20in%204K%2C%20w%E2%A7%B8%20%20%40videogameworlds%20%5B6kvg3odF854%5D.webm#t=120">
+</video>
+<div id="bg-overlay"></div>
+<div id="bg-spores"></div>
+<div id="moonparticles"></div>
+
+<!-- CLICK TO CONTINUE -->
+<div id="ctc">
+  <div class="ctc-inner">
+    <div class="ctc-moon">🌙</div>
+    <span>touch to enter</span>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <div class="lobby-emblem">🌙</div>
+  <div class="lobby-text">
+    <div class="lobby-title">goodnight my dear.</div>
+    <div class="lobby-sub">sweet dreams ♥</div>
+  </div>
+  <div class="lobby-form">
+    <input id="nin" placeholder="your name" maxlength="20" inputmode="text" autocomplete="off"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();go()}"/>
+    <button onclick="go()">enter ♥</button>
+    <div class="watch-divider">or</div>
+    <a href="index.html" class="watch-btn">🎬 watch room</a>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Header -->
+  <div id="hdr">
+    <div class="htitle">goodnight my dear.</div>
+    <div class="dots">
+      <div class="dot on"></div>
+      <div class="dot" id="dp"></div>
+      <div id="plbl">waiting...</div>
+    </div>
+  </div>
+
+  <!-- Tabs (mobile) -->
+  <div id="tabs">
+    <button class="tab active" id="tab-sleep" onclick="switchTab('sleep')">🌙 sleep</button>
+    <button class="tab" id="tab-chat" onclick="switchTab('chat')">💬 chat</button>
+  </div>
+
+  <!-- Main area -->
+  <div id="main">
+    <!-- Sleep panel -->
+    <div id="sleep-panel">
+
+      <!-- Now playing -->
+      <div id="nowplaying">
+        <div class="np-label">now playing</div>
+        <div class="np-title" id="np-title">—</div>
+        <div class="np-controls">
+          <button class="np-btn" id="playbtn" onclick="doPlay()">▶</button>
+          <button class="np-btn" id="pausebtn" onclick="doPause()">⏸</button>
+          <div id="vol-wrap">
+            <span>🔈</span>
+            <input type="range" id="vol" min="0" max="1" step="0.01" value="0.7" oninput="setVol(this.value)"/>
+            <span>🔊</span>
+          </div>
+        </div>
+        <div id="sync-pill">✦ synced</div>
+      </div>
+
+      <!-- Add track -->
+      <div id="addtrack">
+        <input id="turl" placeholder="audio url  (mp3, m4a, ogg…)" inputmode="url" autocomplete="off"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addTrack()}"/>
+        <button onclick="addTrack()">add</button>
+      </div>
+      <div class="section-label">sounds</div>
+      <div id="tracklist"></div>
+    </div>
+
+    <!-- Chat panel (mobile only; desktop uses #main-chat) -->
+    <div id="chat-panel">
+      <div id="messages-mobile"></div>
+      <div id="cbar-mobile" style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 12px;padding-bottom:max(8px,env(safe-area-inset-bottom));background:rgba(2,8,14,0.72);border-top:1px solid rgba(0,255,200,0.07);">
+        <input id="cin-m" placeholder="goodnight…" autocomplete="off" style="flex:1;min-width:0;background:rgba(2,16,22,0.80);border:1px solid rgba(0,212,180,0.16);color:var(--text);font-family:'Raleway',sans-serif;font-size:16px;font-weight:200;padding:9px 16px;border-radius:22px;outline:none;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendM()}"/>
+        <button id="sbtn-m" onclick="sendM()" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(4,22,30,0.85);border:1px solid rgba(0,212,180,0.32);color:var(--accent);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop chat column -->
+  <div id="main-chat" style="display:none;flex-direction:column;">
+    <div id="messages" style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;"></div>
+    <div id="cbar">
+      <input id="cin" placeholder="goodnight…" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();send()}"/>
+      <button id="sbtn" onclick="send()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ── moon particles ────────────────────────────────────────────────
+const mp = document.getElementById('moonparticles');
+for (let i = 0; i < 18; i++) {
+  const m = document.createElement('div');
+  m.className = 'mote';
+  const sz = Math.random()*3+1;
+  m.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;--drift:${(Math.random()-0.5)*60}px;animation-duration:${Math.random()*20+15}s;animation-delay:${Math.random()*20}s;`;
+  mp.appendChild(m);
+}
+
+// ── bg video ──────────────────────────────────────────────────────
+const bgVid = document.getElementById('bg-video');
+bgVid.addEventListener('canplay', () => { if (bgVid.currentTime < 120) bgVid.currentTime = 120; }, { once: true });
+
+const ctcEl = document.getElementById('ctc');
+ctcEl.addEventListener('click', () => {
+  bgVid.play().catch(()=>{});
+  ctcEl.classList.add('hide');
+  setTimeout(()=>ctcEl.remove(), 600);
+}, { once: true });
+
+// ── Firebase ──────────────────────────────────────────────────────
+const FB = {
+  apiKey: "AIzaSyBSEbVyZtl0qTHvzprqhielKPWL8vYTOw4",
+  authDomain: "iwannawatchsomethingwithyou.firebaseapp.com",
+  databaseURL: "https://iwannawatchsomethingwithyou-default-rtdb.firebaseio.com",
+  projectId: "iwannawatchsomethingwithyou",
+  storageBucket: "iwannawatchsomethingwithyou.firebasestorage.app",
+  messagingSenderId: "968886424536",
+  appId: "1:968886424556:web:869a6687bc26671c3fd8ad"
+};
+const ROOM = "sleeproom";
+const db = getDatabase(initializeApp(FB));
+
+let me = '', audio = null, currentTrackKey = null;
+let syncing = false, hbTimer = null;
+const seen = new Set();
+const HB = 4000, DRIFT = 3;
+
+// ── audio helpers ─────────────────────────────────────────────────
+function getAudio() { return audio; }
+function setVol(v) {
+  if (audio) audio.volume = parseFloat(v);
+  updateVolSlider(v);
+}
+window.setVol = setVol;
+
+function updateVolSlider(v) {
+  const s = document.getElementById('vol');
+  s.value = v;
+  const pct = parseFloat(v)*100;
+  s.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${pct}%, rgba(0,212,180,0.2) ${pct}%)`;
+}
+
+function loadAudio(url, name, key, autoplay=false) {
+  if (audio) { audio.pause(); audio.src = ''; }
+  audio = new Audio(url);
+  audio.volume = parseFloat(document.getElementById('vol').value);
+  audio.loop = true;
+  if (autoplay) audio.play().catch(()=>{});
+  currentTrackKey = key;
+  document.getElementById('np-title').textContent = name || url;
+  renderTracks();
+
+  audio.addEventListener('play', () => {
+    if (syncing) return;
+    pushState('play', audio.currentTime);
+    startHB();
+  });
+  audio.addEventListener('pause', () => {
+    if (syncing) return;
+    pushState('pause', audio.currentTime);
+    stopHB();
+  });
+}
+
+// ── sync ──────────────────────────────────────────────────────────
+function pushState(action, t) {
+  set(ref(db, `${ROOM}/audiostate`), { action, t, by: me, ts: Date.now() });
+}
+function applyState(s) {
+  if (!audio || s.by === me) return;
+  syncing = true;
+  const lag = Math.min((Date.now() - (s.ts||Date.now())) / 1000, 5);
+  audio.currentTime = s.t + (s.action === 'play' ? lag : 0);
+  if (s.action === 'play') { audio.play().catch(()=>{}); startHB(); }
+  else audio.pause();
+  setTimeout(()=>{ syncing = false; }, 800);
+  showPill();
+}
+function showPill() {
+  const p = document.getElementById('sync-pill');
+  p.classList.add('on');
+  setTimeout(()=>p.classList.remove('on'), 2000);
+}
+function startHB() {
+  stopHB();
+  hbTimer = setInterval(()=>{
+    if (!audio || audio.paused) return;
+    set(ref(db,`${ROOM}/hb`), { t: audio.currentTime, by: me, ts: Date.now() });
+  }, HB);
+}
+function stopHB() { clearInterval(hbTimer); hbTimer = null; }
+
+window.doPlay = () => { if (audio) { audio.play().catch(()=>{}); } };
+window.doPause = () => { if (audio) audio.pause(); };
+
+// ── built-in tracks ───────────────────────────────────────────────
+const BUILTIN = [
+  {
+    key: 'builtin_1',
+    name: 'Avatar: The Way of Water — Ocean Ambience',
+    url: 'https://files.catbox.moe/5bij9r.m4a',
+    icon: '🌊'
+  }
+];
+
+// ── duration cache ─────────────────────────────────────────────────
+const durCache = {};
+function fmtDur(s) {
+  if (!isFinite(s) || s <= 0) return '';
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = Math.floor(s%60);
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+function loadDur(url, cb) {
+  if (durCache[url] !== undefined) { cb(durCache[url]); return; }
+  const a = new Audio(); a.preload = 'metadata';
+  a.addEventListener('loadedmetadata', () => { durCache[url] = a.duration; cb(a.duration); a.src=''; });
+  a.addEventListener('error', () => { durCache[url] = 0; cb(0); });
+  a.src = url;
+}
+
+// ── tracklist ─────────────────────────────────────────────────────
+let tracks = {}; // key -> {name, url, icon?}
+
+function allTracks() {
+  // merge builtins (always first) with user-added Firebase tracks
+  const merged = {};
+  BUILTIN.forEach(t => { merged[t.key] = t; });
+  Object.entries(tracks).forEach(([k,v]) => { merged[k] = v; });
+  return merged;
+}
+
+function renderTracks() {
+  const el = document.getElementById('tracklist');
+  el.innerHTML = '';
+  Object.entries(allTracks()).forEach(([k, tr]) => {
+    const isBuiltin = k.startsWith('builtin_');
+    const playing = k === currentTrackKey;
+    const div = document.createElement('div');
+    div.className = 'track' + (playing ? ' playing' : '');
+    div.innerHTML = `
+      <div class="track-icon">${playing ? '🔊' : (tr.icon || '🎵')}</div>
+      <div class="track-info">
+        <div class="track-name">${tr.name || tr.url}</div>
+        <div class="track-url">${tr.url.slice(0,38)}…</div>
+      </div>
+      <span class="track-dur" id="dur-${k}">—</span>
+      ${!isBuiltin ? `<button class="track-del" onclick="delTrack('${k}',event)" title="remove">×</button>` : ''}
+    `;
+    div.addEventListener('click', () => playTrack(k));
+    el.appendChild(div);
+    // load duration async
+    loadDur(tr.url, d => {
+      const durEl = document.getElementById(`dur-${k}`);
+      if (durEl) durEl.textContent = fmtDur(d) || '—';
+    });
+  });
+}
+
+function playTrack(key) {
+  const all = allTracks();
+  const tr = all[key];
+  if (!tr) return;
+  set(ref(db, `${ROOM}/nowplaying`), { key, url: tr.url, name: tr.name||tr.url, by: me, ts: Date.now() });
+  loadAudio(tr.url, tr.name, key, true);
+  pushState('play', 0);
+}
+
+window.delTrack = (key, e) => {
+  e.stopPropagation();
+  const updated = { ...tracks };
+  delete updated[key];
+  set(ref(db, `${ROOM}/tracks`), updated);
+};
+
+window.addTrack = () => {
+  const inp = document.getElementById('turl');
+  const url = inp.value.trim();
+  if (!url) return;
+  const name = url.split('/').pop().replace(/\.[^.]+$/, '').replace(/%20/g,' ').slice(0,40) || url;
+  const key = 'tr_' + Date.now();
+  const updated = { ...tracks, [key]: { url, name } };
+  set(ref(db, `${ROOM}/tracks`), updated);
+  inp.value = '';
+};
+
+// ── chat ──────────────────────────────────────────────────────────
+function addMsg(name, text, mine, sys=false) {
+  // add to both desktop and mobile message containers
+  ['messages','messages-mobile'].forEach(id => {
+    const box = document.getElementById(id);
+    if (!box) return;
+    const d = document.createElement('div');
+    d.className = 'msg' + (mine?' me':'') + (sys?' sys':'');
+    d.innerHTML = sys
+      ? `<div class="mbody">${text}</div>`
+      : `${!mine?`<div class="mname">${name}</div>`:''}<div class="mbody">${text}</div>`;
+    d.style.cssText = box.id==='messages-mobile' ? '' : '';
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  });
+}
+
+function send() {
+  const i = document.getElementById('cin'), t = i.value.trim();
+  if (!t) return;
+  push(ref(db, `${ROOM}/messages`), { name: me, text: t, ts: Date.now() });
+  i.value = ''; i.focus();
+}
+function sendM() {
+  const i = document.getElementById('cin-m'), t = i.value.trim();
+  if (!t) return;
+  push(ref(db, `${ROOM}/messages`), { name: me, text: t, ts: Date.now() });
+  i.value = ''; i.focus();
+}
+window.send = send; window.sendM = sendM;
+
+// ── tab switch ────────────────────────────────────────────────────
+window.switchTab = (tab) => {
+  document.getElementById('sleep-panel').style.display = tab === 'sleep' ? 'flex' : 'none';
+  const cp = document.getElementById('chat-panel');
+  cp.style.display = tab === 'chat' ? 'flex' : 'none';
+  if (tab === 'chat') cp.classList.add('active'); else cp.classList.remove('active');
+  document.getElementById('tab-sleep').classList.toggle('active', tab==='sleep');
+  document.getElementById('tab-chat').classList.toggle('active', tab==='chat');
+  if (tab==='chat') {
+    const mob = document.getElementById('messages-mobile');
+    if (mob) mob.scrollTop = mob.scrollHeight;
+  }
+};
+
+// style mobile messages-mobile like messages
+const mobMsgs = document.getElementById('messages-mobile');
+if (mobMsgs) {
+  mobMsgs.style.cssText = 'flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;';
+}
+
+// ── layout ────────────────────────────────────────────────────────
+function layout() {
+  if (window.innerWidth >= 640) return;
+  const hdrH = document.getElementById('hdr').getBoundingClientRect().height;
+  const tabsH = document.getElementById('tabs').getBoundingClientRect().height;
+  const mainEl = document.getElementById('main');
+  const vv = window.visualViewport;
+  const visBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+  mainEl.style.top = (hdrH + tabsH) + 'px';
+  mainEl.style.height = (visBottom - hdrH - tabsH) + 'px';
+}
+window.visualViewport?.addEventListener('resize', layout);
+window.visualViewport?.addEventListener('scroll', layout);
+window.addEventListener('resize', layout);
+
+// ── init ──────────────────────────────────────────────────────────
+window.go = () => {
+  const n = document.getElementById('nin').value.trim();
+  if (!n) return;
+  me = n;
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('app').classList.add('on');
+
+  // desktop: show chat column
+  if (window.innerWidth >= 640) {
+    document.getElementById('main-chat').style.display = 'flex';
+  }
+
+  requestAnimationFrame(layout);
+  presence(); listen();
+  push(ref(db, `${ROOM}/messages`), { name:'—', text:`${me} is here 🌙`, sys:true, ts:Date.now() });
+};
+
+function presence() {
+  const pr = ref(db, `${ROOM}/presence/${me}`);
+  set(pr, { name: me });
+  onDisconnect(pr).remove();
+  onValue(ref(db, `${ROOM}/presence`), snap => {
+    const d = snap.val()||{}, others = Object.keys(d).filter(u=>u!==me);
+    const dot = document.getElementById('dp'), lbl = document.getElementById('plbl');
+    if (others.length) { dot.classList.add('on'); lbl.textContent = others[0]+' is here ♥'; }
+    else { dot.classList.remove('on'); lbl.textContent = 'waiting...'; }
+  });
+}
+
+function listen() {
+  // tracks
+  onValue(ref(db, `${ROOM}/tracks`), snap => {
+    tracks = snap.val() || {};
+    renderTracks();
+  });
+
+  // now playing (track load sync)
+  onValue(ref(db, `${ROOM}/nowplaying`), snap => {
+    const np = snap.val();
+    if (!np || np.by === me) return;
+    if (np.key !== currentTrackKey) {
+      const all = allTracks();
+      const tr = all[np.key];
+      loadAudio(np.url, np.name || (tr && tr.name) || np.url, np.key, false);
+    }
+  });
+
+  // playback state
+  onValue(ref(db, `${ROOM}/audiostate`), snap => {
+    const s = snap.val();
+    if (!s || s.by === me || !audio) return;
+    applyState(s);
+  });
+
+  // heartbeat drift correction
+  onValue(ref(db, `${ROOM}/hb`), snap => {
+    const h = snap.val();
+    if (!h || h.by === me || !audio || audio.paused) return;
+    const drift = Math.abs(audio.currentTime - h.t);
+    if (drift > DRIFT) {
+      syncing = true;
+      audio.currentTime = h.t + 0.3;
+      showPill();
+      setTimeout(()=>{ syncing = false; }, 800);
+    }
+  });
+
+  // messages
+  onValue(ref(db, `${ROOM}/messages`), snap => {
+    const msgs = snap.val();
+    if (!msgs) return;
+    Object.entries(msgs).forEach(([k,m]) => {
+      if (!seen.has(k)) { seen.add(k); addMsg(m.name, m.text, m.name===me, m.sys); }
+    });
+  });
+}
+</script>
+</body>
+</html>
