@@ -42,14 +42,11 @@
       filter: saturate(2.4) brightness(0.75) hue-rotate(-5deg);
       pointer-events: none;
     }
-
     #bg-overlay {
       position: fixed; inset: 0; z-index: 1;
       pointer-events: none;
-      background:
-        radial-gradient(ellipse 100% 100% at 50% 50%, rgba(2,13,18,0.1) 0%, rgba(2,8,14,0.1) 100%);
+      background: radial-gradient(ellipse 100% 100% at 50% 50%, rgba(2,13,18,0.1) 0%, rgba(2,8,14,0.1) 100%);
     }
-
     #bg-spores {
       position: fixed; inset: 0; z-index: 2; pointer-events: none;
       background-image:
@@ -68,42 +65,110 @@
       animation: sporeFloat 22s ease-in-out infinite alternate;
       filter: blur(0.3px);
     }
-
     @keyframes sporeFloat {
       0%   { transform: translateY(0px) translateX(0px); opacity: .9; }
       50%  { transform: translateY(-14px) translateX(6px); opacity: .55; }
       100% { transform: translateY(-28px) translateX(-4px); opacity: .3; }
     }
 
-    /* ── CLICK TO CONTINUE ── */
-    #ctc {
+    /* ── LANDING ── */
+    #landing {
       position: fixed; inset: 0; z-index: 200;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 20px;
-      background: #020d12;
-      cursor: pointer;
-      transition: opacity .6s ease;
+      gap: 48px; padding: 24px;
+      background: rgba(2,10,14,0.72);
+      backdrop-filter: blur(2px);
+      transition: opacity .7s ease;
     }
-    #ctc.hide { opacity: 0; pointer-events: none; }
-    .ctc-inner {
-      display: flex; flex-direction: column; align-items: center; gap: 16px;
-      color: rgba(0,255,200,0.6);
-      font-family: 'Cinzel', serif; font-size: 11px;
-      letter-spacing: .3em; text-transform: uppercase;
-      animation: ctcPulse 2.5s ease-in-out infinite;
+    #landing.hide { opacity: 0; pointer-events: none; }
+
+    .landing-top { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .landing-title {
+      font-family: 'Cinzel', serif; font-size: clamp(1.5rem, 6vw, 2.8rem);
+      font-weight: 300; color: var(--text); letter-spacing: .1em; text-align: center;
+      text-shadow: 0 0 40px rgba(0,212,180,0.7), 0 0 80px rgba(0,180,150,0.3);
+      animation: titleFade 1.2s ease both;
     }
-    .ctc-inner svg { color: rgba(0,255,200,0.5); }
-    @keyframes ctcPulse {
-      0%,100% { opacity: .5; transform: translateY(0); }
-      50%      { opacity: 1;  transform: translateY(-6px); }
+    .landing-sub {
+      font-size: 10px; color: var(--muted); letter-spacing: .3em;
+      text-transform: uppercase; font-style: italic; font-weight: 300;
+      animation: titleFade 1.2s ease .2s both;
     }
+    @keyframes titleFade {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .room-btns {
+      display: flex; flex-direction: column; gap: 14px;
+      width: min(280px, 88vw);
+      animation: titleFade 1.2s ease .4s both;
+    }
+
+    .room-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 18px 20px; border-radius: 10px; cursor: pointer;
+      border: 1px solid; text-decoration: none;
+      transition: all .3s; position: relative; overflow: hidden;
+    }
+    .room-btn::before {
+      content: ''; position: absolute; inset: 0;
+      opacity: 0; transition: opacity .3s;
+    }
+    .room-btn:hover::before { opacity: 1; }
+
+    /* watch room — accent teal */
+    .room-btn.watch {
+      background: rgba(4,20,28,0.82);
+      border-color: rgba(0,212,180,0.38);
+      box-shadow: 0 0 30px rgba(0,212,180,0.12), inset 0 1px 0 rgba(0,255,200,0.12);
+    }
+    .room-btn.watch::before {
+      background: linear-gradient(135deg, rgba(0,255,200,0.09), rgba(0,150,180,0.04), transparent);
+    }
+    .room-btn.watch:hover {
+      border-color: rgba(0,212,180,0.65);
+      box-shadow: 0 0 50px rgba(0,212,180,0.22), inset 0 1px 0 rgba(0,255,200,0.18);
+      transform: translateY(-2px);
+    }
+    .room-btn.watch:active { transform: translateY(0); background: rgba(0,212,180,0.12); }
+
+    /* sleep room — softer blue-purple */
+    .room-btn.sleep {
+      background: rgba(4,14,26,0.82);
+      border-color: rgba(100,160,255,0.22);
+      box-shadow: 0 0 30px rgba(80,140,255,0.08), inset 0 1px 0 rgba(140,180,255,0.08);
+    }
+    .room-btn.sleep::before {
+      background: linear-gradient(135deg, rgba(140,180,255,0.07), rgba(80,120,220,0.03), transparent);
+    }
+    .room-btn.sleep:hover {
+      border-color: rgba(120,170,255,0.45);
+      box-shadow: 0 0 50px rgba(100,150,255,0.15), inset 0 1px 0 rgba(160,200,255,0.12);
+      transform: translateY(-2px);
+    }
+    .room-btn.sleep:active { transform: translateY(0); background: rgba(100,150,255,0.1); }
+
+    .btn-icon { font-size: 22px; line-height: 1; }
+    .btn-label {
+      font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .25em;
+      text-transform: uppercase;
+    }
+    .room-btn.watch .btn-label { color: var(--accent); }
+    .room-btn.sleep .btn-label { color: #a0c4ff; }
+    .btn-desc {
+      font-size: 9px; letter-spacing: .12em; font-weight: 300; font-style: italic;
+    }
+    .room-btn.watch .btn-desc { color: var(--muted); }
+    .room-btn.sleep .btn-desc { color: rgba(140,180,255,0.5); }
 
     /* ── LOBBY ── */
     #lobby {
       position: fixed; inset: 0; z-index: 100;
-      display: flex; flex-direction: column; align-items: center;
+      display: none; flex-direction: column; align-items: center;
       justify-content: center; gap: 36px; padding: 24px;
     }
+    #lobby.show { display: flex; }
 
     .lobby-emblem {
       width: 80px; height: 80px; border-radius: 50%;
@@ -258,7 +323,6 @@
       position: absolute; inset: 0; width: 100%; height: 100%; border: none;
     }
     #vid video { object-fit: contain; background: rgba(0,0,0,0.6); }
-
     #vid::after {
       content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
       box-shadow: inset 0 0 50px rgba(0,0,0,0.45);
@@ -404,20 +468,29 @@
 </head>
 <body>
 
-<!-- Pandora forest video background -->
 <video id="bg-video" autoplay muted loop playsinline preload="none"
   src="https://archive.org/download/avatar-peaceful-forests-of-pandora-music-ambience-in-4-k-w-videogameworlds-6kvg-3od-f-854_202604/Avatar%20%EF%BD%9C%20Peaceful%20Forests%20of%20Pandora%20Music%20%26%20Ambience%20in%204K%2C%20w%E2%A7%B8%20%20%40videogameworlds%20%5B6kvg3odF854%5D.webm#t=120">
 </video>
 <div id="bg-overlay"></div>
 <div id="bg-spores"></div>
 
-<!-- CLICK TO CONTINUE -->
-<div id="ctc">
-  <div class="ctc-inner">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-      <polygon points="5,3 19,12 5,21"/>
-    </svg>
-    <span>click to continue</span>
+<!-- LANDING — choose your room -->
+<div id="landing">
+  <div class="landing-top">
+    <div class="landing-title">just us.</div>
+    <div class="landing-sub">where do you want to go?</div>
+  </div>
+  <div class="room-btns">
+    <div class="room-btn watch" onclick="enterWatch()">
+      <div class="btn-icon">🎬</div>
+      <div class="btn-label">Watch Room</div>
+      <div class="btn-desc">watch something together</div>
+    </div>
+    <a class="room-btn sleep" href="sleep.html">
+      <div class="btn-icon">🌙</div>
+      <div class="btn-label">Sleep Room</div>
+      <div class="btn-desc">fall asleep together</div>
+    </a>
   </div>
 </div>
 
@@ -494,13 +567,16 @@ import { getDatabase, ref, set, push, onValue, onDisconnect } from "https://www.
 const bgVid = document.getElementById('bg-video');
 bgVid.addEventListener('canplay', () => { if (bgVid.currentTime < 120) bgVid.currentTime = 120; }, { once: true });
 
-// click-to-continue: unlock autoplay on first interaction
-const ctcEl = document.getElementById('ctc');
-ctcEl.addEventListener('click', () => {
-  bgVid.play().catch(() => {});
-  ctcEl.classList.add('hide');
-  setTimeout(() => ctcEl.remove(), 600);
-}, { once: true });
+// ── LANDING ───────────────────────────────────────────────────────
+window.enterWatch = () => {
+  bgVid.play().catch(()=>{});
+  const landing = document.getElementById('landing');
+  landing.classList.add('hide');
+  setTimeout(() => {
+    landing.style.display = 'none';
+    document.getElementById('lobby').classList.add('show');
+  }, 700);
+};
 
 const FB = {
   apiKey: "AIzaSyBSEbVyZtl0qTHvzprqhielKPWL8vYTOw4",
